@@ -3,6 +3,11 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>FunctionBuilder</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FunctionBuilder.Logic\FunctionBuilder.Logic.csproj" />
+  </ItemGroup>
 
 </Project>
