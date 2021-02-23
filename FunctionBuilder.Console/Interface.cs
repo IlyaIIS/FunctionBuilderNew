@@ -9,12 +9,17 @@ namespace FunctionBuilder
         static public string AskFormula(string text)
         {
             string output;
-            do
+            Console.Write("\r" + new string(' ', Console.WindowWidth - Console.CursorLeft) + "\r" + text);
+            output = Console.ReadLine();
+            while(!OPZ.IsFormulaCorrectly(output, out string errorText))
             {
                 Console.SetCursorPosition(0, 0);
-                Console.Write(new string(' ', Console.WindowWidth - Console.CursorLeft) + "\r" + text);
+                Console.Write("\r" + new string(' ', Console.WindowWidth - Console.CursorLeft) + "\r" + errorText);
+                Console.ReadKey(true);
+                Console.Write("\r" + new string(' ', Console.WindowWidth - Console.CursorLeft) + "\r" + text);
                 output = Console.ReadLine();
-            } while (!output.Contains('x'));
+            }
+            
             return output;
         }
         static public double AskDoubleNum(int line, string text)

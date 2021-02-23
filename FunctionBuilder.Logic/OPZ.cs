@@ -226,5 +226,60 @@ namespace FunctionBuilder
 
             return Convert.ToDouble(input[0]);
         }
+
+        static public bool IsFormulaCorrectly(string formula, out string errorText)
+        {
+            errorText = String.Empty;
+            int bracketNum = 0;
+            foreach (char letter in formula)
+            {
+                if (letter == '(') bracketNum++;
+                if (letter == ')') bracketNum--;
+            }
+            if (bracketNum > 0)
+            {
+                errorText = "Не все скобки закрыты";
+                return false;
+            }
+            if (bracketNum < 0)
+            {
+                errorText = "Закрывающих скобок больше, чем открывающих";
+                return false;
+            }
+
+            for (int i = 0; i < formula.Length; i++)
+            {
+                char letter = formula[i];
+                if (Char.IsDigit(letter) || letter == 'x')
+                {
+                    var neigList = new List<char>();
+                    if (i == 0)
+                        neigList.Add(formula[i + 1]);
+                    else
+                        if (i == formula.Length - 1)
+                        neigList.Add(formula[i - 1]);
+                        else
+                            neigList = new List<char> { formula[i - 1], formula[i + 1] };
+
+                    foreach (char neig in neigList)
+                    {
+                        char[] signArr = new char[] { ',', '.', '(', ')', '+', '-', '*', '/', '^', '!' };
+                        if (!(Char.IsDigit(neig) || signArr.Contains(neig)))
+                        {
+                            errorText = "Неизвестный символ в формуле";
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            if (formula.Length == 0)
+            {
+                errorText = "Формула не введина";
+                return false;
+            }
+
+            return true;
+        }
     }
 }
