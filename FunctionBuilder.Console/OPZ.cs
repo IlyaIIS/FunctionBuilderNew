@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace FunctionBuilder
@@ -71,22 +72,17 @@ namespace FunctionBuilder
                 {
                     for (int ii = 0; ii < pInput.Length; ii++)
                     {
-                        if (ii == i) Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write(pInput[ii] + " ");
-                        Console.ResetColor();
+                        Debug.Write(pInput[ii] + " ");
                     }
-                    Console.WriteLine();
-                    Console.WriteLine();
+                    Debug.WriteLine(' ');
+                    Debug.WriteLine(' ');
 
                     string local = "";
                     for (int ii = 0; ii < firstList.Count; ii++) local += firstList[ii] + " ";
-                    Console.WriteLine("Первая строка: " + local);
+                    Debug.WriteLine("Первая строка: " + local);
                     local = "";
                     for (int ii = 0; ii < secondList.Count; ii++) local += secondList[ii] + " ";
-                    Console.WriteLine("Вторая строка: " + local);
-
-                    Console.ReadKey(true);
-                    Console.Clear();
+                    Debug.WriteLine("Вторая строка: " + local);
                 }
             }
 
