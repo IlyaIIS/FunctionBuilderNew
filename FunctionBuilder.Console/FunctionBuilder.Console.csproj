@@ -6,4 +6,8 @@
     <RootNamespace>FunctionBuilder</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FunctionBuilder.Logic\FunctionBuilder.Logic.csproj" />
+  </ItemGroup>
+
 </Project>

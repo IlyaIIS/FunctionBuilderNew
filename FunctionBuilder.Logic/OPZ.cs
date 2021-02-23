@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace FunctionBuilder
 {
-    static class OPZ
+    static public class OPZ
     {
         //Константы
         static string[] signsList = { "+", "-", "*", "/", "^", "(", ")", "sin", "log", "!", "round" };
