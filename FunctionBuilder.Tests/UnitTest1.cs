@@ -9,7 +9,7 @@ namespace FunctionBuilder
         public void CalculatorTest()
         {
             var expression = "round(5*1.3)^2";
-            Assert.AreEqual(OPZ.ParseExpression(expression), new List<string> {"5", "1.3", "*", "round", "2", "^" });
+            Assert.AreEqual(new List<string> { "5", "1.3", "*", "round", "2", "^" }, OPZ.ParseExpression(expression));
         }
 
         [TestCase("sinx", ExpectedResult = false)]
@@ -20,7 +20,7 @@ namespace FunctionBuilder
         }
 
         [TestCaseSource(nameof(TestCases))]
-        public void CalculatorTests(List<string> expression, double result)
+        public void CalculatorTests(double result, List<string> expression)
         {
             Assert.AreEqual(result, OPZ.Calculate(expression));
         }
@@ -28,10 +28,9 @@ namespace FunctionBuilder
         {
             get
             {
-                yield return new TestCaseData(new List<string> { "1", "2", "+" }, 3);
-                yield return new TestCaseData(new List<string> { "3", "1", "2", "+", "*" }, 9);
+                yield return new TestCaseData(3, new List<string> { "1", "2", "+" });
+                yield return new TestCaseData(9, new List<string> { "3", "1", "2", "+", "*" });
             }
         }
-
     }
 }
