@@ -5,12 +5,6 @@ namespace FunctionBuilder
 {
     public class Tests
     {
-        //ввод верных данных в опз
-        //ввод неверных данных в опз
-        //ввод неверных данных в опз
-        //ввод верного опз в калькулятор
-        //ввод неверного опз в калькулятор
-
         [TestCase]
         public void CalculatorTest()
         {
