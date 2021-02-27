@@ -16,7 +16,7 @@ namespace FunctionBuilder
         [TestCase("((x+1)*2)", ExpectedResult = true)]
         public bool FormulaCorrectlyTest(string formula)
         {
-            return OPZ.IsFormulaCorrectly(formula, out string s);
+            return OPZ.IsExpressionCorrectly(formula, out string s);
         }
 
         [TestCaseSource(nameof(TestCases))]

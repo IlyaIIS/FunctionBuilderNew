@@ -227,9 +227,22 @@ namespace FunctionBuilder
             return Convert.ToDouble(input[0]);
         }
 
-        static public bool IsFormulaCorrectly(string formula, out string errorText)
+        static public bool IsExpressionCorrectly(string formula, out string errorText)
         {
             errorText = String.Empty;
+
+            if (formula == null || formula.Length == 0)
+            {
+                errorText = "Формула не введина";
+                return false;
+            }
+
+            if (formula.Length == 1)
+            {
+                errorText = "Формула слишком коротка";
+                return false;
+            }
+
             int bracketNum = 0;
             foreach (char letter in formula)
             {
@@ -271,12 +284,6 @@ namespace FunctionBuilder
                         }
                     }
                 }
-            }
-
-            if (formula.Length == 0)
-            {
-                errorText = "Формула не введина";
-                return false;
             }
 
             return true;

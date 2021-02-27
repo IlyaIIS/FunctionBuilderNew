@@ -11,7 +11,7 @@ namespace FunctionBuilder
             string output;
             Console.Write("\r" + new string(' ', Console.WindowWidth - Console.CursorLeft) + "\r" + text);
             output = Console.ReadLine();
-            while(!OPZ.IsFormulaCorrectly(output, out string errorText))
+            while(!OPZ.IsExpressionCorrectly(output, out string errorText))
             {
                 Console.SetCursorPosition(0, 0);
                 Console.Write("\r" + new string(' ', Console.WindowWidth - Console.CursorLeft) + "\r" + errorText);
