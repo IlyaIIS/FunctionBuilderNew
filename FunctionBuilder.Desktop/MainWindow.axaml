@@ -4,24 +4,24 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="349" d:DesignHeight="93"
         Width="349" Height="93"
-        Background="#c0c9dd"
+        Background="Black"
         x:Class="FunctionBuilder.Desktop.MainWindow"
         Title="FunctionBuilder.Desktop">
-  
+        
         <StackPanel>
-          <Border BorderThickness="3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Left" >
+          <Border BorderThickness="3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
             <DockPanel>
               <TextBlock VerticalAlignment="Center">Введите выражение:</TextBlock>
-              <TextBox Name ="tbExpression" BorderThickness ="0" MinWidth="200"></TextBox>
+              <TextBox Name ="tbExpression" BorderThickness ="0" KeyUp="tbCheckFormula_LostFocus"></TextBox>
             </DockPanel>
           </Border>
-          <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Left" >
-            <Button Background="#c0c9dd" MinWidth="343" HorizontalContentAlignment="Center" Click="btCalculate_Click">
+          <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
+            <Button Name="btnCalculate" Background="#d5d6dd" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Click="btnCalculate_Click">
               РАССЧИТАТЬ ВЫРАЖЕНИЕ
             </Button>
           </Border>
           <Grid Name="gResult" IsVisible="True">
-            <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Left" MinWidth="349">
+            <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch">
              <DockPanel>
                <TextBlock>Ответ:ᅠ</TextBlock>
                <TextBlock Name="tbResult" />
