@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -8,7 +9,7 @@ namespace FunctionBuilder
     {
         static void Main(string[] args)
         {
-            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("ry");
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
             string formula = Interface.AskFormula("Введите формулу: у=");
             double step = Interface.AskDoubleNum(1, "Введите шаг: ");

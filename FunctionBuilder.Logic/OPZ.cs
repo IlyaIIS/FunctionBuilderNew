@@ -7,7 +7,6 @@ namespace FunctionBuilder
 {
     static public class OPZ
     {
-        //Константы
         static string[] signsList = { "+", "-", "*", "/", "^", "(", ")", "sin", "log", "!", "round" };
 
         static Dictionary<string, int> ordersList = new Dictionary<string, int>
@@ -24,9 +23,22 @@ namespace FunctionBuilder
             {"round", 10}
         };
 
-        //Получить польскую запсь
-        static public List<string> ParseExpression(string input)
+        static Dictionary<string, int> operandsNumList = new Dictionary<string, int>
         {
+            {"+", 2},
+            {"-", 2},
+            {"*", 2},
+            {"/", 2},
+            {"^", 2},
+            {"sin", 1},
+            {"log", 2},
+            {"!", 1},
+            {"round", 1}
+        };
+
+        static public List<string> GetRPN(string input)
+        {
+            input = input.Replace(" ", "");
             string[] pInput = ParseInput(input);
             List<string> firstList = new List<string>();
             List<string> secondList = new List<string>();
@@ -91,8 +103,7 @@ namespace FunctionBuilder
             return firstList;
         }
 
-        //Выделить в строке цифры и знаки
-        static string[] ParseInput(string input)
+        static public string[] LastParseInput(string input)
         {
             List<string> preOutput = new List<string>();
             string[] output;
@@ -152,13 +163,65 @@ namespace FunctionBuilder
                 }
             }
 
+            for (int i = 1; i < preOutput.Count-1; i++)
+            {
+                if (preOutput[i] == "(" && Char.IsDigit(preOutput[i - 1].Last()))
+                    preOutput.Insert(i, "*");
+                if (preOutput[i] == ")" && Char.IsDigit(preOutput[i + 1].Last()))
+                    preOutput.Insert(i + 1, "*");
+            }
+
             output = new string[preOutput.Count];
             for (int i = 0; i < output.Length; i++) output[i] = preOutput[i];
-
             return output;
         }
         
-        //Калькулятор
+        static public string[] ParseInput(string input)
+        {
+            var preOutput = new List<string>();
+            string[] output;
+            var signsArr = new char[] { '+', '-', '*', '/', '^', '(', ')', ',', 'x' };
+            string token = string.Empty;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (signsArr.Contains(input[i]))
+                {
+                    if (token.Length != 0)
+                    {
+                        preOutput.Add(token);
+                        token = string.Empty;
+                    }
+                    preOutput.Add(input[i].ToString());
+                }
+                else
+                {
+                    token += input[i];
+                }
+            }
+            if (token.Length != 0) preOutput.Add(token);
+
+            for (int i = 0; i < preOutput.Count; i++)
+            {
+                if (preOutput[i] == ",")
+                {
+                    preOutput.Remove(",");
+                    i--;
+                }
+            }
+
+            for (int i = 1; i < preOutput.Count - 1; i++)
+            {
+                if (preOutput[i] == "(" && Char.IsDigit(preOutput[i - 1].Last()))
+                    preOutput.Insert(i, "*");
+                if (preOutput[i] == ")" && Char.IsDigit(preOutput[i + 1].Last()))
+                    preOutput.Insert(i + 1, "*");
+            }
+
+            output = new string[preOutput.Count];
+            for (int i = 0; i < output.Length; i++) output[i] = preOutput[i];
+            return output;
+        }
+
         static public double Calculate(List<string> input)
         {
             for (int i = 0; i < input.Count; i++)
@@ -237,6 +300,8 @@ namespace FunctionBuilder
                 return false;
             }
 
+            formula = formula.Replace(" ", "");
+
             if (formula.Length == 1)
             {
                 errorText = "Формула слишком коротка";
@@ -248,42 +313,44 @@ namespace FunctionBuilder
             {
                 if (letter == '(') bracketNum++;
                 if (letter == ')') bracketNum--;
+                if (bracketNum < 0)
+                {
+                    errorText = "Ошибка в расставлении скобок";
+                    return false;
+                }
             }
             if (bracketNum > 0)
             {
                 errorText = "Не все скобки закрыты";
                 return false;
             }
-            if (bracketNum < 0)
-            {
-                errorText = "Закрывающих скобок больше, чем открывающих";
-                return false;
-            }
 
-            for (int i = 0; i < formula.Length; i++)
-            {
-                char letter = formula[i];
-                if (Char.IsDigit(letter) || letter == 'x')
+            var rpn = ParseInput(formula);
+
+            foreach(string el in rpn)
+                if (!Double.TryParse(el, out double digit) && !signsList.Contains(el))
                 {
-                    var neigList = new List<char>();
-                    if (i == 0)
-                        neigList.Add(formula[i + 1]);
-                    else
-                        if (i == formula.Length - 1)
-                        neigList.Add(formula[i - 1]);
-                        else
-                            neigList = new List<char> { formula[i - 1], formula[i + 1] };
-
-                    foreach (char neig in neigList)
-                    {
-                        char[] signArr = new char[] { ',', '.', '(', ')', '+', '-', '*', '/', '^', '!' };
-                        if (!(Char.IsDigit(neig) || signArr.Contains(neig)))
-                        {
-                            errorText = "Неизвестный символ в формуле";
-                            return false;
-                        }
-                    }
+                    errorText = "Неизвестный символ в формуле";
+                    return false;
                 }
+
+            int needOperandNum = 0;
+            int operandNum = 0;
+            foreach (string el in rpn)
+                if (operandsNumList.ContainsKey(el))
+                {
+                    operandNum++;
+                    needOperandNum += operandsNumList[el];
+                }else
+                {
+                    if (Double.TryParse(el, out double d))
+                        operandNum++;
+                }
+            
+            if (needOperandNum != operandNum - 1)
+            {
+                errorText = "Формула некорректна";
+                return false;
             }
 
             return true;

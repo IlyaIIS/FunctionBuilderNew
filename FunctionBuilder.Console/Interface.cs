@@ -72,7 +72,7 @@ namespace FunctionBuilder
         }
         static double GetY(string formula, double x)
         {
-            return OPZ.Calculate(OPZ.ParseExpression(formula.Replace("x", Convert.ToString(x))));
+            return OPZ.Calculate(OPZ.GetRPN(formula.Replace("x", Convert.ToString(x))));
         }
 
         static string WriteBorder(char char0, char char1, char char2, char char3, int maxSize, string text)

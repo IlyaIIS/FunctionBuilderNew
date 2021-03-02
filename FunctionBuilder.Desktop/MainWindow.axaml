@@ -12,11 +12,11 @@
           <Border BorderThickness="3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
             <DockPanel>
               <TextBlock VerticalAlignment="Center">Введите выражение:</TextBlock>
-              <TextBox Name ="tbExpression" BorderThickness ="0" KeyUp="tbCheckFormula_LostFocus"></TextBox>
+              <TextBox Name ="tbExpression" BorderThickness ="0" KeyUp="tbCheckFormula_KeyUp"></TextBox>
             </DockPanel>
           </Border>
           <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
-            <Button Name="btnCalculate" Background="#d5d6dd" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Click="btnCalculate_Click">
+            <Button Name="btnCalculate" Background="#dcd6dd" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Click="btnCalculate_Click">
               РАССЧИТАТЬ ВЫРАЖЕНИЕ
             </Button>
           </Border>

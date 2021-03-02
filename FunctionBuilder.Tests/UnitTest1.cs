@@ -9,11 +9,11 @@ namespace FunctionBuilder
         public void CalculatorTest()
         {
             var expression = "round(5*1.3)^2";
-            Assert.AreEqual(new List<string> { "5", "1.3", "*", "round", "2", "^" }, OPZ.ParseExpression(expression));
+            Assert.AreEqual(new List<string> { "5", "1.3", "*", "round", "2", "^" }, OPZ.GetRPN(expression));
         }
 
         [TestCase("sinx", ExpectedResult = false)]
-        [TestCase("((x+1)*2)", ExpectedResult = true)]
+        [TestCase("((x+1)*2)log(8,2)3+1", ExpectedResult = true)]
         public bool FormulaCorrectlyTest(string formula)
         {
             return OPZ.IsExpressionCorrectly(formula, out string s);

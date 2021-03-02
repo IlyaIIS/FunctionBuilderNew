@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using System.Globalization;
 
 namespace FunctionBuilder.Desktop
 {
@@ -11,6 +12,7 @@ namespace FunctionBuilder.Desktop
         public MainWindow()
         {
             InitializeComponent();
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 #if DEBUG
             this.AttachDevTools();
 #endif
@@ -35,39 +37,25 @@ namespace FunctionBuilder.Desktop
 
             gResult.IsVisible = true;
             if (OPZ.IsExpressionCorrectly(expression, out exceptionText))
-                try
-                {
-                    tbResult.Text = OPZ.Calculate(OPZ.ParseExpression(expression)).ToString();
-                }
-                catch
-                {
-                    tbResult.Text = "В формуле содержится ошибка";
-                }
+            {
+                tbResult.Text = OPZ.Calculate(OPZ.GetRPN(expression)).ToString();
+            }
             else
+            {
                 tbResult.Text = exceptionText;
+            }
         }
 
-        private void tbCheckFormula_LostFocus(object sender, KeyEventArgs e)
+        private void tbCheckFormula_KeyUp(object sender, KeyEventArgs e)
         {
             var btnButton = this.Find<Button>("btnCalculate");
             var tbExpression = (TextBox)sender;
             string exception;
 
             if (OPZ.IsExpressionCorrectly(tbExpression.Text, out exception))
-            {
-                try
-                {
-                    OPZ.Calculate(OPZ.ParseExpression(this.FindControl<TextBox>("tbExpression").Text));
-                    btnButton.Background = Avalonia.Media.Brush.Parse("#d5e0dd");
-                }
-                catch
-                {
-                    btnButton.Background = Avalonia.Media.Brush.Parse("#d5d6dd");
-                }
-            }else
-            {
-                btnButton.Background = Avalonia.Media.Brush.Parse("#d5d6dd");
-            }
+                btnButton.Background = Avalonia.Media.Brush.Parse("#d5e0dd");
+            else
+                btnButton.Background = Avalonia.Media.Brush.Parse("#dcd6dd");
         }
     }
 }
