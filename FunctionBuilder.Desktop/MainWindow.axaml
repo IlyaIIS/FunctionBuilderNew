@@ -2,13 +2,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="349" d:DesignHeight="93"
-        Width="349" Height="93"
-        Background="Black"
+        mc:Ignorable="d" d:DesignWidth="349" d:DesignHeight="393"
+        Width="349" Height="393"
+        Background="#223867"
         x:Class="FunctionBuilder.Desktop.MainWindow"
-        Title="FunctionBuilder.Desktop">
+        Title="FunctionBuilder.Desktop"
+        Name="wTheMainWindow"
+        PropertyChanged="MainWindow_PropertyChanged">
         
-        <StackPanel>
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="87"/>
+          <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="2">
           <Border BorderThickness="3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
             <DockPanel>
               <TextBlock VerticalAlignment="Center">Введите выражение:</TextBlock>
@@ -20,13 +27,15 @@
               РАССЧИТАТЬ ВЫРАЖЕНИЕ
             </Button>
           </Border>
-          <Grid Name="gResult" IsVisible="True">
+          <DockPanel>
             <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch">
-             <DockPanel>
-               <TextBlock>Ответ:ᅠ</TextBlock>
-               <TextBlock Name="tbResult" />
-             </DockPanel>
+              <DockPanel>
+                <TextBlock>Ответ:ᅠ</TextBlock>
+                <TextBlock Name="tbResult" />
+              </DockPanel>
             </Border>
-          </Grid>
+          </DockPanel>
         </StackPanel>
+        <Canvas Name="cChart" Margin="5" Background="White" Grid.Row="1" />  
+      </Grid>
 </Window>

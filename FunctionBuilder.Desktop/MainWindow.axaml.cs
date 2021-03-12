@@ -1,9 +1,12 @@
+using System;
+using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using System.Globalization;
+using Avalonia.Media;
 
 namespace FunctionBuilder.Desktop
 {
@@ -21,21 +24,19 @@ namespace FunctionBuilder.Desktop
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-
-            var tbExpression = this.FindControl<TextBox>("tbExpression");
-            var bBorder = this.Find<Border>("bBotder");
+            Drawer.DrawCanvas(this);
         }
 
+
+        /////////////////////////////////////////////////// —Œ¡€“»ﬂ //////////////////////////////////////////////////////
         private void btnCalculate_Click(object sender, RoutedEventArgs e)
         {
-            var gResult = this.Find<Grid>("gResult");
             var tbResult = this.Find<TextBlock>("tbResult");
             var tbExpression = this.FindControl<TextBox>("tbExpression");
 
             string expression = tbExpression.Text;
             string exceptionText;
 
-            gResult.IsVisible = true;
             if (OPZ.IsExpressionCorrectly(expression, out exceptionText))
             {
                 tbResult.Text = OPZ.Calculate(OPZ.GetRPN(expression)).ToString();
@@ -56,6 +57,11 @@ namespace FunctionBuilder.Desktop
                 btnButton.Background = Avalonia.Media.Brush.Parse("#d5e0dd");
             else
                 btnButton.Background = Avalonia.Media.Brush.Parse("#dcd6dd");
+        }
+
+        private void MainWindow_PropertyChanged(object sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            if (e.Property.Name == "Width" || e.Property.Name == "Height") Drawer.DrawCanvas(this);
         }
     }
 }
