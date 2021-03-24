@@ -36,6 +36,6 @@
             </Border>
           </DockPanel>
         </StackPanel>
-        <Canvas Name="cChart" Margin="5" Background="White" Grid.Row="1" />  
+        <Canvas Name="cGraphCanvas" Margin="5" Background="White" Grid.Row="1"/>  
       </Grid>
 </Window>

@@ -46,7 +46,7 @@ namespace FunctionBuilder
 
             for (int i = 0; i < pInput.Length; i++)
             {
-                if (Char.IsDigit(pInput[i][0])) firstList.Add(pInput[i]);
+                if (Char.IsDigit(pInput[i][0]) || pInput[i] == "x") firstList.Add(pInput[i]);
                 else
                 if (pInput[i][0] == '(') secondList.Add(pInput[i]);
                 else
@@ -328,7 +328,7 @@ namespace FunctionBuilder
             var rpn = ParseInput(formula);
 
             foreach(string el in rpn)
-                if (!Double.TryParse(el, out double digit) && !signsList.Contains(el))
+                if (!Double.TryParse(el, out double digit) && !signsList.Contains(el) && el != "x")
                 {
                     errorText = "Неизвестный символ в формуле";
                     return false;
@@ -343,7 +343,7 @@ namespace FunctionBuilder
                     needOperandNum += operandsNumList[el];
                 }else
                 {
-                    if (Double.TryParse(el, out double d))
+                    if (Double.TryParse(el, out double d) || el == "x")
                         operandNum++;
                 }
             
