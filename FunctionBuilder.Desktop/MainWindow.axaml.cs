@@ -24,7 +24,8 @@ namespace FunctionBuilder.Desktop
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
-            Drawer.DrawCanvas(this);
+            Drawer.SetControls(this);
+            Drawer.CanvasSizeChenged();
         }
 
 
@@ -39,7 +40,8 @@ namespace FunctionBuilder.Desktop
 
             if (OPZ.IsExpressionCorrectly(expression, out exceptionText))
             {
-                tbResult.Text = OPZ.Calculate(OPZ.GetRPN(expression)).ToString();
+                Drawer.Expression = expression;
+                Drawer.RedrawCanvas();
             }
             else
             {
@@ -61,7 +63,7 @@ namespace FunctionBuilder.Desktop
 
         private void MainWindow_PropertyChanged(object sender, AvaloniaPropertyChangedEventArgs e)
         {
-            if (e.Property.Name == "Width" || e.Property.Name == "Height") Drawer.DrawCanvas(this);
+            if (e.Property.Name == "Width" || e.Property.Name == "Height") Drawer.CanvasSizeChenged();
         }
     }
 }
