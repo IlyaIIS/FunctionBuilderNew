@@ -30,8 +30,7 @@
           <DockPanel>
             <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch">
               <DockPanel>
-                <TextBlock>Ответ:ᅠ</TextBlock>
-                <TextBlock Name="tbResult" />
+                <TextBlock Name="tbZoom" Text=" "/>
               </DockPanel>
             </Border>
           </DockPanel>
