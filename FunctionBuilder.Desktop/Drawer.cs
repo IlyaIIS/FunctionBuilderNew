@@ -16,13 +16,51 @@ namespace FunctionBuilder.Desktop
         static public Canvas GraphCanvas { get; private set; }
         static public Window TheMainWindow { get; private set; }
         static public Point Offset { get; private set; }
+        static private Point mousePastyPos;
+        static private bool mousePressed = false;
+        static public double Zoom { get; private set; } = 1;
         static public string Expression { get; set; }
         static public void SetControls(Window window)
         {
             TheMainWindow = window;
             GraphCanvas = TheMainWindow.Find<Canvas>("cGraphCanvas");
             GraphCanvas.PointerPressed += GraphCanvas_PointerPressed;
+            GraphCanvas.PointerMoved += GraphCanvas_PointerMoved;
             GraphCanvas.PointerReleased += GraphCanvas_PointerReleased;
+            GraphCanvas.PointerWheelChanged += GraphCanvas_PointerWheelChanged;
+        }
+
+        private static void GraphCanvas_PointerPressed(object? sender, PointerPressedEventArgs e)
+        {
+            var canvas = (Canvas)sender;
+            mousePastyPos = e.GetPosition(canvas);
+            mousePressed = true;
+        }
+        private static void GraphCanvas_PointerMoved(object? sender, PointerEventArgs e)
+        {
+            var canvas = (Canvas)sender;
+            Point mousePos = e.GetPosition(canvas);
+            if (mousePressed)
+            {
+                Offset = new Point(mousePos.X - mousePastyPos.X + Offset.X, mousePos.Y - mousePastyPos.Y + Offset.Y);
+                RedrawCanvas();
+                mousePastyPos = mousePos;
+            }
+        }
+        private static void GraphCanvas_PointerReleased(object? sender, PointerReleasedEventArgs e)
+        {
+            var canvas = (Canvas)sender;
+            Point mouseEndPos = e.GetPosition(canvas);
+            Offset = new Point(mouseEndPos.X - mousePastyPos.X + Offset.X, mouseEndPos.Y - mousePastyPos.Y + Offset.Y);
+            RedrawCanvas();
+            mousePressed = false;
+        }
+        private static void GraphCanvas_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
+        {
+            Zoom = Math.Max(Zoom * (1 - 0.1*e.Delta.Y), 0.005);
+            TheMainWindow.FindControl<TextBlock>("tbZoom").Text = Math.Round(Zoom, 3).ToString();
+
+            RedrawCanvas();
         }
 
         static public void CanvasSizeChenged() 
@@ -43,7 +81,7 @@ namespace FunctionBuilder.Desktop
                 AddLinesOnGraphCanvas(Thinker.GetPointsList(Expression,
                     -GraphWidth / 2, GraphWidth / 2, 1,
                     -GraphHeight / 2, GraphHeight / 2,
-                    new DoublePoint(Offset.X, Offset.Y)));
+                    new DoublePoint(Offset.X, Offset.Y), Zoom));
         }
 
         static private void AddArrow(double x1, double y1, double x2, double y2, Canvas canvas)
@@ -113,22 +151,6 @@ namespace FunctionBuilder.Desktop
         {
             GraphWidth = TheMainWindow.Width - GraphCanvas.Margin.Right * 2;
             GraphHeight = TheMainWindow.Height - (87 + GraphCanvas.Margin.Top * 2 + 4);
-
-            MouseDevice md = new MouseDevice();
-        }
-
-        private static void GraphCanvas_PointerPressed(object? sender, PointerPressedEventArgs e)
-        {
-            var canvas = (Canvas)sender;
-            canvas.Tag = e.GetPosition(canvas);
-        }
-
-        private static void GraphCanvas_PointerReleased(object? sender, PointerReleasedEventArgs e)
-        {
-            var canvas = (Canvas)sender;
-            Point mousePos = e.GetPosition(canvas);
-            Offset = new Point(mousePos.X - ((Point)canvas.Tag).X + Offset.X, mousePos.Y - ((Point)canvas.Tag).Y + Offset.Y);
-            RedrawCanvas();
         }
     }
 }
