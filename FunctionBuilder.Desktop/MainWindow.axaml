@@ -30,7 +30,9 @@
           <DockPanel>
             <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch">
               <DockPanel>
-                <TextBlock Name="tbZoom" Text=" "/>
+                <TextBlock Name="tbXCoord" MinWidth="80" Text="x:      "/>
+                <TextBlock Name="tbYCoord" MinWidth="100" Text="y:"/>
+                <TextBlock Name="tbInfo" Text=" "/>
               </DockPanel>
             </Border>
           </DockPanel>

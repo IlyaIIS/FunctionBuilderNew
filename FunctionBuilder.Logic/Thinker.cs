@@ -6,8 +6,10 @@ namespace FunctionBuilder
 {
     static public class Thinker
     {
-        static public List<DoublePoint> GetPointsList(string expression, double xStart, double xEnd, double step, double minY, double maxY, DoublePoint offset, double zoom = 1)
+        static public List<DoublePoint> GetPointsList(string expression, double xStart, double xEnd, double minY, double maxY, DoublePoint offset, double zoom = 1)
         {
+            double step = (xEnd - xStart) / 339; // Не присваивать числа вида 1/х !
+
             List<string> rpn = OPZ.GetRPN(expression);
             var output = new List<DoublePoint>();
 

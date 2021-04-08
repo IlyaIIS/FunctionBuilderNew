@@ -20,14 +20,36 @@ namespace FunctionBuilder.Desktop
         static private bool mousePressed = false;
         static public double Zoom { get; private set; } = 1;
         static public string Expression { get; set; }
+        static private int debag = 0;
         static public void SetControls(Window window)
         {
             TheMainWindow = window;
-            GraphCanvas = TheMainWindow.Find<Canvas>("cGraphCanvas");
+            GraphCanvas = window.Find<Canvas>("cGraphCanvas");
             GraphCanvas.PointerPressed += GraphCanvas_PointerPressed;
-            GraphCanvas.PointerMoved += GraphCanvas_PointerMoved;
+            GraphCanvas.PointerMoved += GraphCanvas_PointerMovedDrag;
             GraphCanvas.PointerReleased += GraphCanvas_PointerReleased;
             GraphCanvas.PointerWheelChanged += GraphCanvas_PointerWheelChanged;
+            GraphCanvas.PointerMoved += GraphCanvas_PointerMoved;
+        }
+
+        private static void GraphCanvas_PointerMoved(object? sender, PointerEventArgs e)
+        {
+            if (!mousePressed && Expression != null)
+            {
+                TextBlock tbXCoord = TheMainWindow.FindControl<TextBlock>("tbXCoord");
+                TextBlock tbYCoord = TheMainWindow.FindControl<TextBlock>("tbYCoord");
+                var canvas = (Canvas)sender;
+
+                double x = (e.GetPosition(canvas).X - GraphWidth / 2 - Offset.X)*Zoom;
+                var rpnList = new List<string>(OPZ.GetRPN(Expression));
+                for (int i = 0; i < rpnList.Count; i++)
+                    if (rpnList[i] == "x")
+                        rpnList[i] = x.ToString();
+                double y = OPZ.Calculate(rpnList);
+
+                tbXCoord.Text = "x: " + Math.Round(x, 2).ToString();
+                tbYCoord.Text = "f(x): " + Math.Round(y, 2).ToString();
+            }    
         }
 
         private static void GraphCanvas_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -36,7 +58,7 @@ namespace FunctionBuilder.Desktop
             mousePastyPos = e.GetPosition(canvas);
             mousePressed = true;
         }
-        private static void GraphCanvas_PointerMoved(object? sender, PointerEventArgs e)
+        private static void GraphCanvas_PointerMovedDrag(object? sender, PointerEventArgs e)
         {
             var canvas = (Canvas)sender;
             Point mousePos = e.GetPosition(canvas);
@@ -58,7 +80,7 @@ namespace FunctionBuilder.Desktop
         private static void GraphCanvas_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
         {
             Zoom = Math.Max(Zoom * (1 - 0.1*e.Delta.Y), 0.005);
-            TheMainWindow.FindControl<TextBlock>("tbZoom").Text = Math.Round(Zoom, 3).ToString();
+            TheMainWindow.FindControl<TextBlock>("tbInfo").Text = "Zoom: " + Math.Round(Zoom, 3).ToString();
 
             RedrawCanvas();
         }
@@ -66,7 +88,6 @@ namespace FunctionBuilder.Desktop
         static public void CanvasSizeChenged() 
         {
             FindGraphCanvasSize();
-
             RedrawCanvas();
         }
 
@@ -79,7 +100,7 @@ namespace FunctionBuilder.Desktop
 
             if (Expression != null)
                 AddLinesOnGraphCanvas(Thinker.GetPointsList(Expression,
-                    -GraphWidth / 2, GraphWidth / 2, 1,
+                    -GraphWidth / 2, GraphWidth / 2,
                     -GraphHeight / 2, GraphHeight / 2,
                     new DoublePoint(Offset.X, Offset.Y), Zoom));
         }
@@ -133,7 +154,7 @@ namespace FunctionBuilder.Desktop
                 canvas.Children.Add(line);
         }
 
-        static public void AddLinesOnGraphCanvas(List<DoublePoint> pointsList)
+        static private void AddLinesOnGraphCanvas(List<DoublePoint> pointsList)
         {
             for (int i = 1; i < pointsList.Count; i++)
             {
@@ -147,7 +168,7 @@ namespace FunctionBuilder.Desktop
             }
         }
 
-        static public void FindGraphCanvasSize()
+        static private void FindGraphCanvasSize()
         {
             GraphWidth = TheMainWindow.Width - GraphCanvas.Margin.Right * 2;
             GraphHeight = TheMainWindow.Height - (87 + GraphCanvas.Margin.Top * 2 + 4);

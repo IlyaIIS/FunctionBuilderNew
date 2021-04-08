@@ -32,7 +32,7 @@ namespace FunctionBuilder.Desktop
         /////////////////////////////////////////////////// янашрхъ //////////////////////////////////////////////////////
         private void btnCalculate_Click(object sender, RoutedEventArgs e)
         {
-            var tbZoom = this.Find<TextBlock>("tbZoom");
+            var tbZoom = this.Find<TextBlock>("tbInfo");
             var tbExpression = this.FindControl<TextBox>("tbExpression");
 
             string expression = tbExpression.Text;
