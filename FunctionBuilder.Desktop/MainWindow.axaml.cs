@@ -83,8 +83,8 @@ namespace FunctionBuilder.Desktop
 
             if (OPZ.IsExpressionCorrectly(expression, out exceptionText))
             {
-                var a = new Table(expression);
-                //Drawer.CreateTableWindow(expression);
+                var table = new Table(expression, OPZ.GetRPN(expression));
+                table.Show();
             }
             else
             {

@@ -69,11 +69,6 @@ namespace FunctionBuilder.Desktop
             }
         }
 
-        public static void CreateTableWindow(string expression)
-        {
-            
-        }
-
         private static void GraphCanvas_PointerReleased(object? sender, PointerReleasedEventArgs e)
         {
             var canvas = (Canvas)sender;
