@@ -20,7 +20,6 @@ namespace FunctionBuilder.Desktop
         static private bool mousePressed = false;
         static public double Zoom { get; private set; } = 1;
         static public string Expression { get; set; }
-        static private int debag = 0;
         static public void SetControls(Window window)
         {
             TheMainWindow = window;
@@ -69,6 +68,12 @@ namespace FunctionBuilder.Desktop
                 mousePastyPos = mousePos;
             }
         }
+
+        public static void CreateTableWindow(string expression)
+        {
+            
+        }
+
         private static void GraphCanvas_PointerReleased(object? sender, PointerReleasedEventArgs e)
         {
             var canvas = (Canvas)sender;

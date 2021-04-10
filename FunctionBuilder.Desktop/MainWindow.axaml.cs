@@ -32,7 +32,7 @@ namespace FunctionBuilder.Desktop
         /////////////////////////////////////////////////// —Œ¡€“»ﬂ //////////////////////////////////////////////////////
         private void btnCalculate_Click(object sender, RoutedEventArgs e)
         {
-            var tbZoom = this.Find<TextBlock>("tbInfo");
+            var tbInfo = this.Find<TextBlock>("tbInfo");
             var tbExpression = this.FindControl<TextBox>("tbExpression");
 
             string expression = tbExpression.Text;
@@ -45,25 +45,51 @@ namespace FunctionBuilder.Desktop
             }
             else
             {
-                tbZoom.Text = exceptionText;
+                tbInfo.Text = exceptionText;
             }
         }
 
         private void tbCheckFormula_KeyUp(object sender, KeyEventArgs e)
         {
-            var btnButton = this.Find<Button>("btnCalculate");
+            var btnCalculate = this.Find<Button>("btnCalculate");
+            var btnTable = this.Find<Button>("btnTable");
             var tbExpression = (TextBox)sender;
             string exception;
 
             if (OPZ.IsExpressionCorrectly(tbExpression.Text, out exception))
-                btnButton.Background = Avalonia.Media.Brush.Parse("#d5e0dd");
+            {
+                btnCalculate.Background = Avalonia.Media.Brush.Parse("#d5e0dd");
+                btnTable.Background = Avalonia.Media.Brush.Parse("#d5e0dd");
+            }
             else
-                btnButton.Background = Avalonia.Media.Brush.Parse("#dcd6dd");
+            {
+                btnCalculate.Background = Avalonia.Media.Brush.Parse("#dcd6dd");
+                btnTable.Background = Avalonia.Media.Brush.Parse("#dcd6dd");
+            }
         }
 
         private void MainWindow_PropertyChanged(object sender, AvaloniaPropertyChangedEventArgs e)
         {
             if (e.Property.Name == "Width" || e.Property.Name == "Height") Drawer.CanvasSizeChenged();
+        }
+
+        private void btnTable_Click(object sender, RoutedEventArgs e)
+        {
+            var tbInfo = this.Find<TextBlock>("tbInfo");
+            var tbExpression = this.FindControl<TextBox>("tbExpression");
+
+            string expression = tbExpression.Text;
+            string exceptionText;
+
+            if (OPZ.IsExpressionCorrectly(expression, out exceptionText))
+            {
+                var a = new Table(expression);
+                //Drawer.CreateTableWindow(expression);
+            }
+            else
+            {
+                tbInfo.Text = exceptionText;
+            }
         }
     }
 }
