@@ -175,7 +175,7 @@ namespace FunctionBuilder
             for (int i = 0; i < output.Length; i++) output[i] = preOutput[i];
             return output;
         }
-        
+
         static public string[] ParseInput(string input)
         {
             var preOutput = new List<string>();
@@ -209,12 +209,22 @@ namespace FunctionBuilder
                 }
             }
 
+            var operatorList = new List<string>() {"-", "+", "*", "/", "^" };
             for (int i = 1; i < preOutput.Count - 1; i++)
             {
-                if (preOutput[i] == "(" && Char.IsDigit(preOutput[i - 1].Last()))
+                if (preOutput[i] == "(" && !signsList.Contains(preOutput[i - 1]))
                     preOutput.Insert(i, "*");
-                if (preOutput[i] == ")" && Char.IsDigit(preOutput[i + 1].Last()))
+                if (preOutput[i] == ")" && !operatorList.Contains(preOutput[i + 1]))
                     preOutput.Insert(i + 1, "*");
+            }
+
+            for (int i = 0; i < preOutput.Count; i++)
+            {
+                if (preOutput[i] == "x")
+                    if (i > 0 && !signsList.Contains(preOutput[i - 1]))
+                        preOutput.Insert(i, "*");
+                    else if (i+1 < preOutput.Count && !operatorList.Contains(preOutput[i + 1]) && preOutput[i + 1] != ")")
+                        preOutput.Insert(i + 1, "*");
             }
 
             output = new string[preOutput.Count];
@@ -302,7 +312,7 @@ namespace FunctionBuilder
 
             formula = formula.Replace(" ", "");
 
-            if (formula.Length == 1)
+            if (formula.Length == 1 && formula[0] != 'x')
             {
                 errorText = "Формула слишком коротка";
                 return false;

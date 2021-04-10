@@ -2,8 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="349" d:DesignHeight="393"
-        Width="349" Height="393"
+        mc:Ignorable="d" d:DesignWidth="449" d:DesignHeight="393"
+        Width="449" Height="393"
         Background="#223867"
         x:Class="FunctionBuilder.Desktop.MainWindow"
         Title="FunctionBuilder.Desktop"
@@ -22,15 +22,24 @@
               <TextBox Name ="tbExpression" BorderThickness ="0" KeyUp="tbCheckFormula_KeyUp"></TextBox>
             </DockPanel>
           </Border>
-          <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
-            <Button Name="btnCalculate" Background="#dcd6dd" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Click="btnCalculate_Click">
-              РАССЧИТАТЬ ВЫРАЖЕНИЕ
-            </Button>
-          </Border>
+          <DockPanel>
+            <Border BorderThickness="3,0,0,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
+              <Button Name="btnCalculate" Background="#dcd6dd" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Click="btnCalculate_Click">
+                РАССЧИТАТЬ ВЫРАЖЕНИЕ
+              </Button>
+            </Border>
+            <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
+              <Button Name="btnTable" Background="#dcd6dd" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Click="btnTable_Click">
+                Таблица значений функции
+              </Button>
+            </Border>
+          </DockPanel>
           <DockPanel>
             <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch">
               <DockPanel>
-                <TextBlock Name="tbZoom" Text=" "/>
+                <TextBlock Name="tbXCoord" MinWidth="80" Text="x:      "/>
+                <TextBlock Name="tbYCoord" MinWidth="100" Text="y:"/>
+                <TextBlock Name="tbInfo" Text=" "/>
               </DockPanel>
             </Border>
           </DockPanel>
