@@ -8,16 +8,15 @@ namespace FunctionBuilder.Desktop
 {
     class Table
     {
-        private List<Vector> pointsList = new List<Vector>();
-        private List<string> rpnList;
+        private Rpn rpn;
         private Window window;
         private TextBox tbStart;
         private TextBox tbEnd;
         private TextBox tbStep;
         private StackPanel spValues;
-        public Table(string expression, List<string> rpnList)
+        public Table(string expression, Rpn rpn)
         {
-            this.rpnList = rpnList;
+            this.rpn = rpn;
 
             window = new Window();
             window.MinWidth = 200;
@@ -90,10 +89,8 @@ namespace FunctionBuilder.Desktop
                 double x = xStart;
                 do
                 {
-                    var rpnListLocal = new List<string>(rpnList);
-                    for (int i = 0; i < rpnListLocal.Count; i++)
-                        if (rpnListLocal[i] == "x")
-                            rpnListLocal[i] = x.ToString();
+                    var localRpn = new Rpn(rpn);
+                    localRpn.SetVariable(x);
 
                     var dp = new DockPanel();
                     dp.Children.Add(new TextBlock()
@@ -104,7 +101,7 @@ namespace FunctionBuilder.Desktop
                     });
                     dp.Children.Add(new TextBlock()
                     {
-                        Text = Math.Round(OPZ.Calculate(rpnListLocal),3).ToString(),
+                        Text = Math.Round(localRpn.Calculate(), 3).ToString(),
                         Width = window.MinWidth / 2,
                         TextAlignment = Avalonia.Media.TextAlignment.Center
                     });

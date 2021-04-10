@@ -38,7 +38,7 @@ namespace FunctionBuilder.Desktop
             string expression = tbExpression.Text;
             string exceptionText;
 
-            if (OPZ.IsExpressionCorrectly(expression, out exceptionText))
+            if (Rpn.IsExpressionCorrectly(expression, out exceptionText))
             {
                 Drawer.Expression = expression;
                 Drawer.RedrawCanvas();
@@ -56,7 +56,7 @@ namespace FunctionBuilder.Desktop
             var tbExpression = (TextBox)sender;
             string exception;
 
-            if (OPZ.IsExpressionCorrectly(tbExpression.Text, out exception))
+            if (Rpn.IsExpressionCorrectly(tbExpression.Text, out exception))
             {
                 btnCalculate.Background = Avalonia.Media.Brush.Parse("#d5e0dd");
                 btnTable.Background = Avalonia.Media.Brush.Parse("#d5e0dd");
@@ -81,9 +81,9 @@ namespace FunctionBuilder.Desktop
             string expression = tbExpression.Text;
             string exceptionText;
 
-            if (OPZ.IsExpressionCorrectly(expression, out exceptionText))
+            if (Rpn.IsExpressionCorrectly(expression, out exceptionText))
             {
-                var table = new Table(expression, OPZ.GetRPN(expression));
+                var table = new Table(expression, new Rpn(expression));
                 table.Show();
             }
             else

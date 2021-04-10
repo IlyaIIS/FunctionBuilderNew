@@ -5,8 +5,10 @@ using System.Linq;
 
 namespace FunctionBuilder
 {
-    static public class OPZ
+    public class Rpn
     {
+        private List<Token> tokens = new List<Token>();
+
         static string[] signsList = { "+", "-", "*", "/", "^", "(", ")", "sin", "log", "!", "round" };
 
         static Dictionary<string, int> ordersList = new Dictionary<string, int>
@@ -36,7 +38,7 @@ namespace FunctionBuilder
             {"round", 1}
         };
 
-        static public List<string> GetRPN(string input)
+        public Rpn(string input)
         {
             input = input.Replace(" ", "");
             string[] pInput = ParseInput(input);
@@ -47,10 +49,8 @@ namespace FunctionBuilder
             for (int i = 0; i < pInput.Length; i++)
             {
                 if (Char.IsDigit(pInput[i][0]) || pInput[i] == "x") firstList.Add(pInput[i]);
-                else
-                if (pInput[i][0] == '(') secondList.Add(pInput[i]);
-                else
-                if (pInput[i][0] == ')')
+                else if (pInput[i][0] == '(') secondList.Add(pInput[i]);
+                else if (pInput[i][0] == ')')
                 {
                     for (int ii = secondList.Count - 1; ii >= 0; ii--)
                     {
@@ -99,84 +99,22 @@ namespace FunctionBuilder
             }
 
             for (int i = secondList.Count - 1; i >= 0; i--) firstList.Add(secondList[i]);
-
-            return firstList;
+            
+            foreach(string el in firstList)
+            {
+                if (Double.TryParse(el, out double result)) tokens.Add(new Token(result, TokenType.Digit));
+                else if (el == "(" || el == ")") tokens.Add(new Token(el, TokenType.Sign));
+                else if (el == "x") tokens.Add(new Token(el, TokenType.Variable));
+                else tokens.Add(new Token(el, TokenType.Operator));
+            }
         }
 
-        static public string[] LastParseInput(string input)
+        public Rpn(Rpn input)
         {
-            List<string> preOutput = new List<string>();
-            string[] output;
-            input += "  ";
-
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (Char.IsDigit(input[i]))
-                {
-                    preOutput.Add("");
-                    for (; i < input.Length; i++)
-                    {
-                        if (Char.IsDigit(input[i]) || input[i] == '.')
-                            
-                        {
-                            preOutput[preOutput.Count - 1] += input[i];
-                        }
-                        else
-                        {
-                            if (input[i] == 'E' && (input[i + 1] == '+' || input[i + 1] == '-'))
-                            {
-                                preOutput[preOutput.Count - 1] += input[i];
-                                preOutput[preOutput.Count - 1] += input[i + 1];
-                                i++;
-                            }
-                            else
-                            {
-                                i--;
-                                break;
-                            }
-                        }
-                    }
-                }
-                else
-                if (signsList.Contains(Convert.ToString(input[i])))
-                {
-                    if (input[i] == '-')
-                        if (i > 0)
-                        {
-                            if (!Char.IsDigit(input[i - 1]) && (input[i - 1] == '(' || input[i - 1] != ')'))
-                                preOutput.Add("0");
-                        }
-                        else
-                            preOutput.Add("0");
-                    preOutput.Add(Convert.ToString(input[i]));
-                }
-                else
-                if (input[i] != ' ' && input[i] != ',' && input[i] != ';')
-                {
-                    string local = "";
-                    for (;; i++)
-                    {
-                        local += input[i];
-                        if (signsList.Contains(Convert.ToString(local))) break;
-                    }
-                    preOutput.Add(local);
-                }
-            }
-
-            for (int i = 1; i < preOutput.Count-1; i++)
-            {
-                if (preOutput[i] == "(" && Char.IsDigit(preOutput[i - 1].Last()))
-                    preOutput.Insert(i, "*");
-                if (preOutput[i] == ")" && Char.IsDigit(preOutput[i + 1].Last()))
-                    preOutput.Insert(i + 1, "*");
-            }
-
-            output = new string[preOutput.Count];
-            for (int i = 0; i < output.Length; i++) output[i] = preOutput[i];
-            return output;
+            tokens = new List<Token>(input.tokens);
         }
 
-        static public string[] ParseInput(string input)
+        private static string[] ParseInput(string input)
         {
             var preOutput = new List<string>();
             string[] output;
@@ -232,72 +170,79 @@ namespace FunctionBuilder
             return output;
         }
 
-        static public double Calculate(List<string> input)
+        public double Calculate()
         {
-            for (int i = 0; i < input.Count; i++)
+            for (int i = 0; i < tokens.Count; i++)
             {
-                if (signsList.Contains(input[i]))
+                if (tokens[i].Type != TokenType.Digit && tokens[i].Type != TokenType.Variable)
                 {
-                    switch (input[i])
+                    switch (tokens[i].Content)
                     {
                         case "+":
-                            input[i] = Convert.ToString(Convert.ToDouble(input[i - 2]) + Convert.ToDouble(input[i - 1]));
-                            input.RemoveAt(i - 1);
-                            input.RemoveAt(i - 2);
+                            tokens[i] = new Token((Double)tokens[i - 2].Content + (Double)tokens[i - 1].Content);
+                            tokens.RemoveAt(i - 1);
+                            tokens.RemoveAt(i - 2);
                             i -= 2;
                             break;
                         case "-":
-                            input[i] = Convert.ToString(Convert.ToDouble(input[i - 2]) - Convert.ToDouble(input[i - 1]));
-                            input.RemoveAt(i - 1);
-                            input.RemoveAt(i - 2);
+                            tokens[i] = new Token((Double)tokens[i - 2].Content - (Double)tokens[i - 1].Content);
+                            tokens.RemoveAt(i - 1);
+                            tokens.RemoveAt(i - 2);
                             i -= 2;
                             break;
                         case "*":
-                            input[i] = Convert.ToString(Convert.ToDouble(input[i - 2]) * Convert.ToDouble(input[i - 1]));
-                            input.RemoveAt(i - 1);
-                            input.RemoveAt(i - 2);
+                            tokens[i] = new Token((Double)tokens[i - 2].Content * (Double)tokens[i - 1].Content);
+                            tokens.RemoveAt(i - 1);
+                            tokens.RemoveAt(i - 2);
                             i -= 2;
                             break;
                         case "/":
-                            input[i] = Convert.ToString(Convert.ToDouble(input[i - 2]) / Convert.ToDouble(input[i - 1]));
-                            input.RemoveAt(i - 1);
-                            input.RemoveAt(i - 2);
+                            tokens[i] = new Token((Double)tokens[i - 2].Content / (Double)tokens[i - 1].Content);
+                            tokens.RemoveAt(i - 1);
+                            tokens.RemoveAt(i - 2);
                             i -= 2;
                             break;
                         case "^":
-                            input[i] = Convert.ToString(Math.Pow(Convert.ToDouble(input[i - 2]), Convert.ToDouble(input[i - 1])));
-                            input.RemoveAt(i - 1);
-                            input.RemoveAt(i - 2);
+                            tokens[i] = new Token(Math.Pow((Double)tokens[i - 2].Content, (Double)tokens[i - 1].Content));
+                            tokens.RemoveAt(i - 1);
+                            tokens.RemoveAt(i - 2);
                             i -= 2;
                             break;
                         case "sin":
-                            input[i] = Convert.ToString(Math.Sin(Convert.ToDouble(input[i - 1])));
-                            input.RemoveAt(i - 1);
+                            tokens[i] = new Token(Math.Sin((Double)tokens[i - 1].Content));
+                            tokens.RemoveAt(i - 1);
                             i -= 1;
                             break;
                         case "log":
-                            input[i] = Convert.ToString(Math.Log10(Convert.ToDouble(input[i - 2])) / Math.Log10((Convert.ToDouble(input[i - 1]))));
-                            input.RemoveAt(i - 1);
-                            input.RemoveAt(i - 2);
+                            tokens[i] = new Token(Math.Log10((Double)tokens[i - 2].Content) / Math.Log10((Double)tokens[i - 1].Content));
+                            tokens.RemoveAt(i - 1);
+                            tokens.RemoveAt(i - 2);
                             i -= 2;
                             break;
                         case "!":
                             double x = 1;
-                            for (int ii = 2; ii <= Convert.ToInt32(input[i - 1]); ii++) x *= ii;
-                            input[i] = Convert.ToString(x);
-                            input.RemoveAt(i - 1);
+                            for (int ii = 2; ii <= (Double)tokens[i - 1].Content; ii++) x *= ii;
+                            tokens[i] = new Token(x);
+                            tokens.RemoveAt(i - 1);
                             i -= 1;
                             break;
                         case "round":
-                            input[i] = Convert.ToString(Math.Round(Convert.ToDouble(input[i - 1])));
-                            input.RemoveAt(i - 1);
+                            tokens[i] = new Token(Math.Round((Double)tokens[i - 1].Content));
+                            tokens.RemoveAt(i - 1);
                             i -= 1;
                             break;
                     }
                 }
             }
 
-            return Convert.ToDouble(input[0]);
+            return (Double)tokens[0].Content;
+        }
+
+        public void SetVariable(double digit)
+        {
+            for (int i = 0; i < tokens.Count; i++)
+                if (tokens[i].Type == TokenType.Variable)
+                    tokens[i] = new Token(digit);
         }
 
         static public bool IsExpressionCorrectly(string formula, out string errorText)
@@ -365,5 +310,29 @@ namespace FunctionBuilder
 
             return true;
         }
+    }
+
+    class Token
+    {
+        public TokenType Type { get; private set; }
+        public object Content { get; private set; }
+        public Token(object content, TokenType type)
+        {
+            Content = content;
+            Type = type;
+        }
+        public Token(double content)
+        {
+            Content = content;
+            Type = TokenType.Digit;
+        }
+    }
+
+    enum TokenType
+    {
+        Digit,
+        Operator,
+        Sign,
+        Variable
     }
 }

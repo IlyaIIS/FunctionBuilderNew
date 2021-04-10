@@ -11,15 +11,28 @@ namespace FunctionBuilder.Desktop
 {
     static class Drawer
     {
-        static public double GraphWidth { get; private set; }
-        static public double GraphHeight { get; private set; }
-        static public Canvas GraphCanvas { get; private set; }
-        static public Window TheMainWindow { get; private set; }
-        static public Point Offset { get; private set; }
-        static private Point mousePastyPos;
-        static private bool mousePressed = false;
-        static public double Zoom { get; private set; } = 1;
-        static public string Expression { get; set; }
+        public static double GraphWidth { get; private set; }
+        public static double GraphHeight { get; private set; }
+        public static Canvas GraphCanvas { get; private set; }
+        public static Window TheMainWindow { get; private set; }
+        public static Point Offset { get; private set; }
+        private static Point mousePastyPos;
+        private static bool mousePressed = false;
+        public static double Zoom { get; private set; } = 1;
+        public static string Expression 
+        { 
+            get
+            {
+                return expression;
+            }
+            set
+            {
+                expression = value;
+                rpn = new Rpn(value);
+            }
+        }
+        private static string expression;
+        private static Rpn rpn; 
         static public void SetControls(Window window)
         {
             TheMainWindow = window;
@@ -33,18 +46,16 @@ namespace FunctionBuilder.Desktop
 
         private static void GraphCanvas_PointerMoved(object? sender, PointerEventArgs e)
         {
-            if (!mousePressed && Expression != null)
+            if (!mousePressed && expression != null)
             {
                 TextBlock tbXCoord = TheMainWindow.FindControl<TextBlock>("tbXCoord");
                 TextBlock tbYCoord = TheMainWindow.FindControl<TextBlock>("tbYCoord");
                 var canvas = (Canvas)sender;
 
                 double x = (e.GetPosition(canvas).X - GraphWidth / 2 - Offset.X)*Zoom;
-                var rpnList = new List<string>(OPZ.GetRPN(Expression));
-                for (int i = 0; i < rpnList.Count; i++)
-                    if (rpnList[i] == "x")
-                        rpnList[i] = x.ToString();
-                double y = OPZ.Calculate(rpnList);
+                Rpn localRpn = new Rpn(rpn);
+                localRpn.SetVariable(x);
+                double y = localRpn.Calculate();
 
                 tbXCoord.Text = "x: " + Math.Round(x, 2).ToString();
                 tbYCoord.Text = "f(x): " + Math.Round(y, 2).ToString();
@@ -98,8 +109,8 @@ namespace FunctionBuilder.Desktop
             AddArrow(0, GraphHeight / 2 + Offset.Y, GraphWidth, GraphHeight / 2 + Offset.Y, GraphCanvas);
             AddArrow(GraphWidth / 2 + Offset.X, GraphHeight, GraphWidth / 2 + Offset.X, 0, GraphCanvas);
 
-            if (Expression != null)
-                AddLinesOnGraphCanvas(Thinker.GetPointsList(Expression,
+            if (expression != null)
+                AddLinesOnGraphCanvas(Thinker.GetPointsList(rpn,
                     -GraphWidth / 2, GraphWidth / 2,
                     -GraphHeight / 2, GraphHeight / 2,
                     new DoublePoint(Offset.X, Offset.Y), Zoom));

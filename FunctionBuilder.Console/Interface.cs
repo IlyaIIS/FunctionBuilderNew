@@ -11,7 +11,7 @@ namespace FunctionBuilder
             string output;
             Console.Write("\r" + new string(' ', Console.WindowWidth - Console.CursorLeft) + "\r" + text);
             output = Console.ReadLine();
-            while(!OPZ.IsExpressionCorrectly(output, out string errorText))
+            while(!Rpn.IsExpressionCorrectly(output, out string errorText))
             {
                 Console.SetCursorPosition(0, 0);
                 Console.Write("\r" + new string(' ', Console.WindowWidth - Console.CursorLeft) + "\r" + errorText);
@@ -40,7 +40,8 @@ namespace FunctionBuilder
         static public void WriteResult(string formula, double step, double xStart, double xEnd)
         {
             double x, y;
-            int maxSize = GetMaxSizeXY(formula, 2, xStart, step, xEnd);
+            Rpn rpn = new Rpn(formula);
+            int maxSize = GetMaxSizeXY(rpn, 2, xStart, step, xEnd);
             string text = "";
 
             //Отрисовка
@@ -55,7 +56,7 @@ namespace FunctionBuilder
             x = xStart;
             do
             {
-                y = GetY(formula, x);
+                y = GetY(rpn, x);
 
                 text = WriteMid(' ', '│', Convert.ToString(x), Convert.ToString(y),
                     (maxSize - GetDigitSize(x)) / 2,
@@ -70,9 +71,10 @@ namespace FunctionBuilder
 
             Console.WriteLine(text);
         }
-        static double GetY(string formula, double x)
+        static double GetY(Rpn rpn, double x)
         {
-            return OPZ.Calculate(OPZ.GetRPN(formula.Replace("x", Convert.ToString(x))));
+            rpn.SetVariable(x);
+            return rpn.Calculate();
         }
 
         static string WriteBorder(char char0, char char1, char char2, char char3, int maxSize, string text)
@@ -85,12 +87,12 @@ namespace FunctionBuilder
                 new string(char0, maxSize2) + char3 + new string(char0, maxSize4) + char1 + "\n";
         }
 
-        static int GetMaxSizeXY(string formula, int maxSize, double x, double step, double xEnd)
+        static int GetMaxSizeXY(Rpn rpn, int maxSize, double x, double step, double xEnd)
         {
             double y;
             do
             {
-                y = GetY(formula, x);
+                y = GetY(rpn, x);
                 if (GetDigitSize(y) > maxSize) { maxSize = GetDigitSize(y); }
                 if (GetDigitSize(x) > maxSize) { maxSize = GetDigitSize(x); }
                 x += step;
