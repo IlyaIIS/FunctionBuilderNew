@@ -100,7 +100,7 @@ namespace FunctionBuilder.Desktop
 
         private void btnStep_Click(object sender, RoutedEventArgs e)
         {
-            var tbStep = this.Find<TextBlock>("tbStep");
+            var tbStep = this.FindControl<TextBox>("tbStep");
             tbStep.Text = "default";
 
             Drawer.SetStepDefault();

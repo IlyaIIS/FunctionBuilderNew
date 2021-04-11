@@ -4,9 +4,9 @@ using System.Text;
 
 namespace FunctionBuilder
 {
-    static public class Thinker
+    public static class Thinker
     {
-        static public List<DoublePoint> GetPointsList(Rpn rpn, double xStart, double xEnd, double minY, double maxY, double step, DoublePoint offset, double zoom = 1)
+        public static List<DoublePoint> GetPointsList(Rpn rpn, double xStart, double xEnd, double minY, double maxY, double step, DoublePoint offset, double zoom = 1)
         {
             if (Double.IsNaN(step)) step = (xEnd - xStart) / 339;
 
@@ -38,17 +38,21 @@ namespace FunctionBuilder
             for (int i = 1; i < output.Count-1; i++)
             {
                 if (output[i].Y == maxY)
+                {
                     if (output[i - 1].Y == maxY && output[i + 1].Y == maxY)
                     {
                         output.RemoveAt(i);
                         i--;
                     }
-                    else if (output[i].Y == minY)
-                        if (output[i - 1].Y == minY && output[i + 1].Y == minY)
-                        {
-                            output.RemoveAt(i);
-                            i--;
-                        }
+                }
+                else if (output[i].Y == minY)
+                {
+                    if (output[i - 1].Y == minY && output[i + 1].Y == minY)
+                    {
+                        output.RemoveAt(i);
+                        i--;
+                    }
+                }
             }
 
             return output;

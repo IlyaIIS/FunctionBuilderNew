@@ -25,7 +25,7 @@
           <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
             <DockPanel>
               <TextBlock VerticalAlignment="Center">Введите шаг:</TextBlock>
-              <TextBox Name ="tbStep" Text="default" BorderThickness ="0" KeyUp="tbStep_KeyUp" Width="90"/>
+              <TextBox Name ="tbStep" Text="default" BorderThickness ="0" KeyUp="tbStep_KeyUp" Width="85"/>
               <Button Name="btnStep" Content="Установить значение по умолчанию" Click="btnStep_Click" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" />
             </DockPanel>
           </Border>
@@ -51,6 +51,6 @@
             </Border>
           </DockPanel>
         </StackPanel>
-        <Canvas Name="cGraphCanvas" Margin="5" Background="White" Grid.Row="1"/>  
+        <Canvas Name="cGraphCanvas" Margin="5" Background="White" Grid.Row="1" ClipToBounds="True"/>  
       </Grid>
 </Window>

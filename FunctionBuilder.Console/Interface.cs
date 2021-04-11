@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FunctionBuilder
 {
@@ -73,8 +71,9 @@ namespace FunctionBuilder
         }
         static double GetY(Rpn rpn, double x)
         {
-            rpn.SetVariable(x);
-            return rpn.Calculate();
+            var localRpn = new Rpn(rpn);
+            localRpn.SetVariable(x);
+            return localRpn.Calculate();
         }
 
         static string WriteBorder(char char0, char char1, char char2, char char3, int maxSize, string text)

@@ -97,13 +97,13 @@ namespace FunctionBuilder.Desktop
             RedrawCanvas();
         }
 
-        static public void CanvasSizeChenged() 
+        public static void CanvasSizeChenged() 
         {
             FindGraphCanvasSize();
             RedrawCanvas();
         }
 
-        static public void RedrawCanvas()
+        public static void RedrawCanvas()
         {
             GraphCanvas.Children.Clear();
 
@@ -113,12 +113,12 @@ namespace FunctionBuilder.Desktop
             if (expression != null)
                 AddLinesOnGraphCanvas(Thinker.GetPointsList(rpn,
                     -GraphWidth / 2, GraphWidth / 2,
-                    -GraphHeight / 2, GraphHeight / 2,
+                    -GraphHeight / 2 - 1, GraphHeight / 2 + 1,
                     Step,
                     new DoublePoint(Offset.X, Offset.Y), Zoom));
         }
 
-        static private void AddArrow(double x1, double y1, double x2, double y2, Canvas canvas)
+        private static void AddArrow(double x1, double y1, double x2, double y2, Canvas canvas)
         {
             double width = 5;
             double length = 15;
@@ -167,7 +167,7 @@ namespace FunctionBuilder.Desktop
                 canvas.Children.Add(line);
         }
 
-        static private void AddLinesOnGraphCanvas(List<DoublePoint> pointsList)
+        private static void AddLinesOnGraphCanvas(List<DoublePoint> pointsList)
         {
             for (int i = 1; i < pointsList.Count; i++)
             {
@@ -181,7 +181,7 @@ namespace FunctionBuilder.Desktop
             }
         }
 
-        static private void FindGraphCanvasSize()
+        private static void FindGraphCanvasSize()
         {
             GraphWidth = TheMainWindow.Width - GraphCanvas.Margin.Right * 2;
             GraphHeight = TheMainWindow.Height - (120 + GraphCanvas.Margin.Top * 2 + 4);
