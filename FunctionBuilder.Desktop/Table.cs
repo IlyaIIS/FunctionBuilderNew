@@ -83,7 +83,7 @@ namespace FunctionBuilder.Desktop
             if (double.TryParse(tbStart.Text, out double xStart) && 
                 double.TryParse(tbEnd.Text,   out double xEnd) &&
                 double.TryParse(tbStep.Text,  out double step) &&
-                xStart < xEnd)
+                xStart < xEnd && step > 0)
             {
                 spValues.Children.Clear();
                 double x = xStart;

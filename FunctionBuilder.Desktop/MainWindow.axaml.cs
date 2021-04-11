@@ -68,6 +68,12 @@ namespace FunctionBuilder.Desktop
             }
         }
 
+        private void tbStep_KeyUp(object sender, KeyEventArgs e)
+        {
+            var tbStep = (TextBox)sender;
+            if (Double.TryParse(tbStep.Text, out double result) && result > 0) Drawer.Step = result;
+        }
+
         private void MainWindow_PropertyChanged(object sender, AvaloniaPropertyChangedEventArgs e)
         {
             if (e.Property.Name == "Width" || e.Property.Name == "Height") Drawer.CanvasSizeChenged();
@@ -90,6 +96,14 @@ namespace FunctionBuilder.Desktop
             {
                 tbInfo.Text = exceptionText;
             }
+        }
+
+        private void btnStep_Click(object sender, RoutedEventArgs e)
+        {
+            var tbStep = this.Find<TextBlock>("tbStep");
+            tbStep.Text = "default";
+
+            Drawer.SetStepDefault();
         }
     }
 }

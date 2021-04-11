@@ -2,8 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="449" d:DesignHeight="393"
-        Width="449" Height="393"
+        mc:Ignorable="d" d:DesignWidth="449" d:DesignHeight="493"
+        Width="449" Height="493"
         Background="#223867"
         x:Class="FunctionBuilder.Desktop.MainWindow"
         Title="FunctionBuilder.Desktop"
@@ -12,14 +12,21 @@
         
       <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="87"/>
+          <RowDefinition Height="121"/>
           <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel Margin="2">
           <Border BorderThickness="3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
             <DockPanel>
-              <TextBlock VerticalAlignment="Center">Введите выражение:</TextBlock>
-              <TextBox Name ="tbExpression" BorderThickness ="0" KeyUp="tbCheckFormula_KeyUp"></TextBox>
+              <TextBlock VerticalAlignment="Center" Text="Введите выражение:"/>
+              <TextBox Name ="tbExpression" BorderThickness ="0" KeyUp="tbCheckFormula_KeyUp"/>
+            </DockPanel>
+          </Border>
+          <Border BorderThickness="3,0,3,3" Background="#c0c9dd" BorderBrush="#223867" HorizontalAlignment="Stretch" >
+            <DockPanel>
+              <TextBlock VerticalAlignment="Center">Введите шаг:</TextBlock>
+              <TextBox Name ="tbStep" Text="default" BorderThickness ="0" KeyUp="tbStep_KeyUp" Width="90"/>
+              <Button Name="btnStep" Content="Установить значение по умолчанию" Click="btnStep_Click" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalContentAlignment="Center" />
             </DockPanel>
           </Border>
           <DockPanel>
