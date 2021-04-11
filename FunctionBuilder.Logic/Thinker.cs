@@ -6,26 +6,50 @@ namespace FunctionBuilder
 {
     static public class Thinker
     {
-        static public List<DoublePoint> GetPointsList(Rpn rpn, double xStart, double xEnd, double minY, double maxY, DoublePoint offset, double zoom = 1)
+        static public List<DoublePoint> GetPointsList(Rpn rpn, double xStart, double xEnd, double minY, double maxY, double step, DoublePoint offset, double zoom = 1)
         {
-            double step = (xEnd - xStart) / 339; // Не присваивать числа вида 1/х !
+            if (Double.IsNaN(step)) step = (xEnd - xStart) / 339;
 
             var output = new List<DoublePoint>();
 
-            double x = xStart - offset.X;
+            Rpn localRpn;
+            double x = xStart - offset.X - step;
+            bool repeat = true;
             do
             {
-                Rpn localRpn = new Rpn(rpn);
+                x += step;
+
+                if (x >= xEnd - offset.X)
+                {
+                    repeat = false;
+                    x = xEnd - offset.X;
+                }
+
+                localRpn = new Rpn(rpn);
                 localRpn.SetVariable(x * zoom);
                 double y = localRpn.Calculate() / zoom - offset.Y;
 
-                if (y > maxY ) y = maxY ;
-                if (y < minY ) y = minY ;
+                if (y > maxY) y = maxY;
+                if (y < minY) y = minY;
 
                 output.Add(new DoublePoint(x + offset.X, y ));
+            } while (repeat);
 
-                x += step;
-            } while (x <= xEnd - offset.X);
+            for (int i = 1; i < output.Count-1; i++)
+            {
+                if (output[i].Y == maxY)
+                    if (output[i - 1].Y == maxY && output[i + 1].Y == maxY)
+                    {
+                        output.RemoveAt(i);
+                        i--;
+                    }
+                    else if (output[i].Y == minY)
+                        if (output[i - 1].Y == minY && output[i + 1].Y == minY)
+                        {
+                            output.RemoveAt(i);
+                            i--;
+                        }
+            }
 
             return output;
         }

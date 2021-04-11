@@ -15,6 +15,7 @@ namespace FunctionBuilder.Desktop
         public static double GraphHeight { get; private set; }
         public static Canvas GraphCanvas { get; private set; }
         public static Window TheMainWindow { get; private set; }
+        public static double Step { get; set; } = Double.NaN;
         public static Point Offset { get; private set; }
         private static Point mousePastyPos;
         private static bool mousePressed = false;
@@ -113,6 +114,7 @@ namespace FunctionBuilder.Desktop
                 AddLinesOnGraphCanvas(Thinker.GetPointsList(rpn,
                     -GraphWidth / 2, GraphWidth / 2,
                     -GraphHeight / 2, GraphHeight / 2,
+                    Step,
                     new DoublePoint(Offset.X, Offset.Y), Zoom));
         }
 
@@ -182,7 +184,12 @@ namespace FunctionBuilder.Desktop
         static private void FindGraphCanvasSize()
         {
             GraphWidth = TheMainWindow.Width - GraphCanvas.Margin.Right * 2;
-            GraphHeight = TheMainWindow.Height - (87 + GraphCanvas.Margin.Top * 2 + 4);
+            GraphHeight = TheMainWindow.Height - (120 + GraphCanvas.Margin.Top * 2 + 4);
+        }
+
+        public static void SetStepDefault()
+        {
+            Step = Double.NaN;
         }
     }
 }
