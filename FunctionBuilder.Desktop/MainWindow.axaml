@@ -51,6 +51,6 @@
             </Border>
           </DockPanel>
         </StackPanel>
-        <Canvas Name="cGraphCanvas" Margin="5" Background="White" Grid.Row="1" ClipToBounds="True"/>  
+        <Canvas Name="cGraphCanvas" Margin="5" Background="White" Grid.Row="1" ClipToBounds="False"/>  
       </Grid>
 </Window>

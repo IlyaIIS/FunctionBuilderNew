@@ -1,12 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 
 namespace FunctionBuilder
 {
     public static class Thinker
     {
-        public static List<DoublePoint> GetPointsList(Rpn rpn, double xStart, double xEnd, double minY, double maxY, double step, DoublePoint offset, double zoom = 1)
+        public static List<DoublePoint> GetPointsList(Rpn rpn, double xStart, double xEnd, double step)
+        {
+            var output = new List<DoublePoint>();
+
+            Rpn localRpn;
+            double x = xStart;
+            do
+            {
+                localRpn = new Rpn(rpn);
+                localRpn.SetVariable(x);
+                double y = localRpn.Calculate();
+
+                output.Add(new DoublePoint(x, y));
+
+                x += step;
+            } while (x <= xEnd);
+
+            return output;
+        }
+
+        public static List<DoublePoint> GetPointsListOld(Rpn rpn, double xStart, double xEnd, double minY, double maxY, double step, DoublePoint offset, double zoom = 1)
         {
             if (Double.IsNaN(step)) step = (xEnd - xStart) / 339;
 

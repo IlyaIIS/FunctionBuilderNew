@@ -245,6 +245,17 @@ namespace FunctionBuilder
                     tokens[i] = new Token(digit);
         }
 
+        public Rpn GetNewRpnWithSetVariable(double digit)
+        {
+            Rpn output = new Rpn(this);
+
+            for (int i = 0; i < tokens.Count; i++)
+                if (tokens[i].Type == TokenType.Variable)
+                    output.tokens[i] = new Token(digit);
+
+            return output;
+        }
+
         static public bool IsExpressionCorrectly(string formula, out string errorText)
         {
             errorText = String.Empty;

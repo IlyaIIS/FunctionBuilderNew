@@ -41,7 +41,7 @@ namespace FunctionBuilder.Desktop
             if (Rpn.IsExpressionCorrectly(expression, out exceptionText))
             {
                 Drawer.Expression = expression;
-                Drawer.RedrawCanvas();
+                Drawer.UpdateCanvas(true);
             }
             else
             {
