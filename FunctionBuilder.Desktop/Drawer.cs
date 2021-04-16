@@ -47,8 +47,8 @@ namespace FunctionBuilder.Desktop
             }
         }
         private static string expression;
-        private static Rpn rpn; 
-        static public void SetControls(Window window)
+        private static Rpn rpn;
+        public static void SetControls(Window window)
         {
             TheMainWindow = window;
             GraphCanvas = window.Find<Canvas>("cGraphCanvas");
@@ -58,8 +58,6 @@ namespace FunctionBuilder.Desktop
             GraphCanvas.PointerWheelChanged += GraphCanvas_PointerWheelChanged;
             GraphCanvas.PointerMoved += GraphCanvas_PointerMoved;
         }
-
-        static private double debug = 1.3;
 
         //Изменение отображаемого значения графика функции в зависимости от позиции мыши
         private static void GraphCanvas_PointerMoved(object? sender, PointerEventArgs e)
@@ -76,7 +74,7 @@ namespace FunctionBuilder.Desktop
                 double y = localRpn.Calculate();
 
                 tbXCoord.Text = "x: " + Math.Round(x, 2).ToString();
-                tbYCoord.Text = "f(x): " + GetLeftPointXPos();//Math.Round(y, 2).ToString();
+                tbYCoord.Text = "f(x): " + Math.Round(y, 2).ToString();
             }    
         }
 
@@ -111,15 +109,13 @@ namespace FunctionBuilder.Desktop
             Zoom = Math.Min(Math.Max(Zoom * (1 - 0.1 * e.Delta.Y), 0.001), 200);
             TheMainWindow.FindControl<TextBlock>("tbInfo").Text = "Zoom: " + Math.Round(Zoom, 3).ToString();
 
-            step = debug*Zoom; /////////////////
-
             UpdateCanvas(true);
         }
 
         public static void CanvasSizeChenged() 
         {
             FindGraphCanvasSize();
-            UpdateCanvas();
+            UpdateCanvas(true);
             if (IsStepDefault) step = GraphWidth / 339;
         }
 
@@ -155,19 +151,17 @@ namespace FunctionBuilder.Desktop
             double minY = -GraphHeight / 2 - 1;
             double maxY = GraphHeight / 2 + 1;
 
-            double x = GetLeftPointXPos() / Zoom + Offset.X;
-            double y = new Rpn(rpn).GetNewRpnWithSetVariable(x).Calculate() / Zoom - Offset.Y;
-            graphPoinst.Add(new DoublePoint(x, y));
+            double x = (-Offset.X - GraphWidth / 2);
+            double y = new Rpn(rpn).GetNewRpnWithSetVariable(x*Zoom).Calculate()/Zoom - Offset.Y;
+            graphPoinst.Add(new DoublePoint(x + Offset.X, y));
 
             foreach(DoublePoint el in pointsList)
             {
-                if (el.X/Zoom > GetLeftPointXPos() && el.X/Zoom < GetRightPointXPos())
+                if (el.X > GetLeftPointXPos() && el.X < GetRightPointXPos())
                 {
                     var point = new DoublePoint(el.X, el.Y);
 
-                    point.Y /= Zoom;
                     point.Y -= Offset.Y;
-                    point.X /= Zoom;
                     point.X += Offset.X;
 
                     if (point.Y > maxY) point.Y = maxY;
@@ -197,9 +191,9 @@ namespace FunctionBuilder.Desktop
                 }
             }
 
-            x = GetRightPointXPos() / Zoom + Offset.X;
-            y = new Rpn(rpn).GetNewRpnWithSetVariable(x).Calculate() / Zoom - Offset.Y;
-            graphPoinst.Add(new DoublePoint(x, y));
+            x = (-Offset.X + GraphWidth / 2);
+            y = new Rpn(rpn).GetNewRpnWithSetVariable(x*Zoom).Calculate() / Zoom - Offset.Y;
+            graphPoinst.Add(new DoublePoint(x + Offset.X, y));
 
             return graphPoinst;
         }
@@ -218,18 +212,18 @@ namespace FunctionBuilder.Desktop
         {
             double xStart = GetLeftPointXPos();
             double xEnd = GetRightPointXPos();
-            pointsList = Thinker.GetPointsList(rpn, xStart, xEnd, Step);
+            pointsList = Thinker.GetPointsList(rpn, xStart, xEnd, Step, Zoom);
         }
         private static void AddPointsOnLeft()
         {
             double xStart = GetLeftPointXPos();
-            var additionalPoints = Thinker.GetPointsList(rpn, xStart, pointsList[0].X - Step, Step);
+            var additionalPoints = Thinker.GetPointsList(rpn, xStart, pointsList[0].X - Step, Step,Zoom);
             pointsList = additionalPoints.Concat(pointsList).ToList();
         }
         private static void AddPointsOnRight()
         {
             double xEnd = GetRightPointXPos();
-            var additionalPoints = Thinker.GetPointsList(rpn, pointsList[pointsList.Count - 1].X + Step, xEnd, Step);
+            var additionalPoints = Thinker.GetPointsList(rpn, pointsList[pointsList.Count - 1].X + Step, xEnd, Step,Zoom);
             pointsList = pointsList.Concat(additionalPoints).ToList();
         }
 

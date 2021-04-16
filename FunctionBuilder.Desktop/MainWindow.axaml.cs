@@ -104,6 +104,7 @@ namespace FunctionBuilder.Desktop
             tbStep.Text = "default";
 
             Drawer.SetStepDefault();
+            Drawer.UpdateCanvas(true);
         }
     }
 }
