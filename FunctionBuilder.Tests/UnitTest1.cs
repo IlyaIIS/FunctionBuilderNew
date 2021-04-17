@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace FunctionBuilder
 {
@@ -8,8 +9,9 @@ namespace FunctionBuilder
         [TestCase]
         public void CalculatorTest()
         {
-            var expression = "round(5*1.3)^2";
-            Assert.AreEqual(new List<string> { "5", "1.3", "*", "round", "2", "^" }, new Rpn(expression));
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            var expression = "round(5*1.3)^x";
+            Assert.AreEqual(new Rpn("round(5*1.3)^10").Calculate(), new Rpn(expression).GetNewRpnWithSetVariable(10).Calculate());
         }
 
         [TestCase("sinx", ExpectedResult = false)]

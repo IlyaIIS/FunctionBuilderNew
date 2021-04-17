@@ -24,6 +24,8 @@ namespace FunctionBuilder.Desktop
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             Drawer.SetControls(this);
             Drawer.CanvasSizeChenged();
         }

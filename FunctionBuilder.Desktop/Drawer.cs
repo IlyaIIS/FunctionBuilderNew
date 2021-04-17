@@ -27,8 +27,11 @@ namespace FunctionBuilder.Desktop
                 step = value;
                 IsStepDefault = false;
             }
-        } 
-        private static double step = GraphWidth / 339;
+        }
+
+        private const int pointNum = 339;
+
+        private static double step = GraphWidth / pointNum;
         public static bool IsStepDefault { get; private set; } = true;
         public static Point Offset { get; private set; }
         private static Point mousePastyPos;
@@ -298,7 +301,7 @@ namespace FunctionBuilder.Desktop
 
         public static void SetStepDefault()
         {
-            step = GraphWidth / 339;
+            step = GraphWidth / pointNum;
             IsStepDefault = true;
         }
     }
