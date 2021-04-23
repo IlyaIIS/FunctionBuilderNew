@@ -71,9 +71,7 @@ namespace FunctionBuilder
         }
         static double GetY(Rpn rpn, double x)
         {
-            var localRpn = new Rpn(rpn);
-            localRpn.SetVariable(x);
-            return localRpn.Calculate();
+            return rpn.GetNewRpnWithSetVariable(x).Calculate();
         }
 
         static string WriteBorder(char char0, char char1, char char2, char char3, int maxSize, string text)
@@ -100,7 +98,7 @@ namespace FunctionBuilder
             return maxSize;
         }
 
-        static int GetDigitSize(double d)            //Сколько символов в числе
+        static int GetDigitSize(double d)            
         {
             return Convert.ToString(d).Length;
         }

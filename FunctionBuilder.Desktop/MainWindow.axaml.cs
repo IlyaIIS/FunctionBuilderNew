@@ -24,6 +24,8 @@ namespace FunctionBuilder.Desktop
         private void InitializeComponent()
         {
             AvaloniaXamlLoader.Load(this);
+
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             Drawer.SetControls(this);
             Drawer.CanvasSizeChenged();
         }
@@ -41,7 +43,7 @@ namespace FunctionBuilder.Desktop
             if (Rpn.IsExpressionCorrectly(expression, out exceptionText))
             {
                 Drawer.Expression = expression;
-                Drawer.RedrawCanvas();
+                Drawer.UpdateCanvas(true);
             }
             else
             {
@@ -104,6 +106,7 @@ namespace FunctionBuilder.Desktop
             tbStep.Text = "default";
 
             Drawer.SetStepDefault();
+            Drawer.UpdateCanvas(true);
         }
     }
 }

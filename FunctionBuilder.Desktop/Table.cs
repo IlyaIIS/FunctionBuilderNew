@@ -1,8 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace FunctionBuilder.Desktop
 {
@@ -89,9 +87,6 @@ namespace FunctionBuilder.Desktop
                 double x = xStart;
                 do
                 {
-                    var localRpn = new Rpn(rpn);
-                    localRpn.SetVariable(x);
-
                     var dp = new DockPanel();
                     dp.Children.Add(new TextBlock()
                     {
@@ -101,7 +96,7 @@ namespace FunctionBuilder.Desktop
                     });
                     dp.Children.Add(new TextBlock()
                     {
-                        Text = Math.Round(localRpn.Calculate(), 3).ToString(),
+                        Text = Math.Round(rpn.GetNewRpnWithSetVariable(x).Calculate(), 3).ToString(),
                         Width = window.MinWidth / 2,
                         TextAlignment = Avalonia.Media.TextAlignment.Center
                     });
