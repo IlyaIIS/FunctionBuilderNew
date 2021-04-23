@@ -6,7 +6,6 @@ using Avalonia.Media;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace FunctionBuilder.Desktop
 {
@@ -72,9 +71,7 @@ namespace FunctionBuilder.Desktop
                 var canvas = (Canvas)sender;
 
                 double x = (e.GetPosition(canvas).X - GraphWidth / 2 - Offset.X)*Zoom;
-                Rpn localRpn = new Rpn(rpn);
-                localRpn.SetVariable(x);
-                double y = localRpn.Calculate();
+                double y = rpn.GetNewRpnWithSetVariable(x).Calculate();
 
                 tbXCoord.Text = "x: " + Math.Round(x, 2).ToString();
                 tbYCoord.Text = "f(x): " + Math.Round(y, 2).ToString();

@@ -8,9 +8,9 @@ namespace FunctionBuilder
     public class Rpn
     {
         private List<Token> tokens = new List<Token>();
-
-        static string[] signsList = { "+", "-", "*", "/", "^", "(", ")", "sin", "log", "!", "round" };
-
+        static readonly string[] signArr = new string[] { "+", "-", "*", "/", "^", "(", ")", "," };
+        static readonly string[] zeroOperatorArr = { "-", "+", "*", "/", "^" };
+        static readonly string[] operatorArr = { "+", "-", "*", "/", "^", "(", ")", "sin", "log", "!", "round" };
         static Dictionary<string, int> ordersList = new Dictionary<string, int>
         {
             {"(", 0},
@@ -24,7 +24,6 @@ namespace FunctionBuilder
             {"!", 10},
             {"round", 10}
         };
-
         static Dictionary<string, int> operandsNumList = new Dictionary<string, int>
         {
             {"+", 2},
@@ -41,7 +40,15 @@ namespace FunctionBuilder
         public Rpn(string input)
         {
             input = input.Replace(" ", "");
+
             string[] pInput = ParseInput(input);
+
+            List<string> stringList = FormStringList(pInput);
+
+            tokens = TransformStringListToTokenList(stringList);
+        }
+        private List<string> FormStringList(string[] pInput)
+        {
             List<string> firstList = new List<string>();
             List<string> secondList = new List<string>();
             bool isDebugEnabled = false;
@@ -67,7 +74,7 @@ namespace FunctionBuilder
                     }
                 }
                 else
-                if (signsList.Contains(pInput[i]))
+                if (operatorArr.Contains(pInput[i]))
                 {
                     if (secondList.Count >= 1)
                     {
@@ -97,16 +104,23 @@ namespace FunctionBuilder
                     Debug.WriteLine("Вторая строка: " + local);
                 }
             }
-
             for (int i = secondList.Count - 1; i >= 0; i--) firstList.Add(secondList[i]);
-            
-            foreach(string el in firstList)
+
+            return firstList;
+        }
+        private List<Token> TransformStringListToTokenList(List<string> stringList)
+        {
+            List<Token> output = new List<Token>();
+
+            foreach (string el in stringList)
             {
-                if (Double.TryParse(el, out double result)) tokens.Add(new Token(result, TokenType.Digit));
-                else if (el == "(" || el == ")") tokens.Add(new Token(el, TokenType.Sign));
-                else if (el == "x") tokens.Add(new Token(el, TokenType.Variable));
-                else tokens.Add(new Token(el, TokenType.Operator));
+                if (Double.TryParse(el, out double result)) output.Add(new Token(result, TokenType.Digit));
+                else if (el == "(" || el == ")") output.Add(new Token(el, TokenType.Sign));
+                else if (el == "x") output.Add(new Token(el, TokenType.Variable));
+                else output.Add(new Token(el, TokenType.Operator));
             }
+
+            return output;
         }
 
         public Rpn(Rpn input)
@@ -118,11 +132,21 @@ namespace FunctionBuilder
         {
             var preOutput = new List<string>();
             string[] output;
-            var signsArr = new char[] { '+', '-', '*', '/', '^', '(', ')', ',', 'x' };
+
+            RudeParce(input, preOutput);
+            preOutput.RemoveAll(x => x == ",");
+            InsertMulSigns(preOutput);
+
+            output = new string[preOutput.Count];
+            
+            return preOutput.ToArray();
+        }
+        private static void RudeParce(string input, List<string> preOutput)
+        {
             string token = string.Empty;
             for (int i = 0; i < input.Length; i++)
             {
-                if (signsArr.Contains(input[i]))
+                if (input[i] == 'x' || signArr.Contains(input[i].ToString()))
                 {
                     if (token.Length != 0)
                     {
@@ -137,37 +161,25 @@ namespace FunctionBuilder
                 }
             }
             if (token.Length != 0) preOutput.Add(token);
-
-            for (int i = 0; i < preOutput.Count; i++)
-            {
-                if (preOutput[i] == ",")
-                {
-                    preOutput.Remove(",");
-                    i--;
-                }
-            }
-
-            var operatorList = new List<string>() {"-", "+", "*", "/", "^" };
+        }
+        private static void InsertMulSigns(List<string> preOutput)
+        {
             for (int i = 1; i < preOutput.Count - 1; i++)
             {
-                if (preOutput[i] == "(" && !signsList.Contains(preOutput[i - 1]))
+                if (preOutput[i] == "(" && !operatorArr.Contains(preOutput[i - 1]))
                     preOutput.Insert(i, "*");
-                if (preOutput[i] == ")" && !operatorList.Contains(preOutput[i + 1]))
+                if (preOutput[i] == ")" && !zeroOperatorArr.Contains(preOutput[i + 1]))
                     preOutput.Insert(i + 1, "*");
             }
 
             for (int i = 0; i < preOutput.Count; i++)
             {
                 if (preOutput[i] == "x")
-                    if (i > 0 && !signsList.Contains(preOutput[i - 1]))
+                    if (i > 0 && !operatorArr.Contains(preOutput[i - 1]))
                         preOutput.Insert(i, "*");
-                    else if (i+1 < preOutput.Count && !operatorList.Contains(preOutput[i + 1]) && preOutput[i + 1] != ")")
+                    else if (i + 1 < preOutput.Count && !zeroOperatorArr.Contains(preOutput[i + 1]) && preOutput[i + 1] != ")")
                         preOutput.Insert(i + 1, "*");
             }
-
-            output = new string[preOutput.Count];
-            for (int i = 0; i < output.Length; i++) output[i] = preOutput[i];
-            return output;
         }
 
         public double Calculate()
@@ -294,7 +306,7 @@ namespace FunctionBuilder
             var rpn = ParseInput(formula);
 
             foreach(string el in rpn)
-                if (!Double.TryParse(el, out double digit) && !signsList.Contains(el) && el != "x")
+                if (!Double.TryParse(el, out double digit) && !operatorArr.Contains(el) && el != "x")
                 {
                     errorText = "Неизвестный символ в формуле";
                     return false;

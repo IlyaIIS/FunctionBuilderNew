@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 
 namespace FunctionBuilder
 {
@@ -15,9 +13,7 @@ namespace FunctionBuilder
             double x = xStart;
             do
             {
-                localRpn = new Rpn(rpn);
-                localRpn.SetVariable(x * zoom);
-                double y = localRpn.Calculate() / zoom;
+                double y = rpn.GetNewRpnWithSetVariable(x * zoom).Calculate() / zoom;
 
                 output.Add(new DoublePoint(x, y));
 
