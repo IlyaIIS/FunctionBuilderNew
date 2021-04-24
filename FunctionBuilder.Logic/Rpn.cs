@@ -7,7 +7,7 @@ namespace FunctionBuilder
 {
     public class Rpn
     {
-        private List<Token> tokens = new List<Token>();
+        private IToken mainToken;
         static readonly string[] signArr = new string[] { "+", "-", "*", "/", "^", "(", ")", "," };
         static readonly string[] zeroOperatorArr = { "-", "+", "*", "/", "^" };
         static readonly string[] operatorArr = { "+", "-", "*", "/", "^", "(", ")", "sin", "log", "!", "round" };
@@ -108,16 +108,19 @@ namespace FunctionBuilder
 
             return firstList;
         }
-        private List<Token> TransformStringListToTokenList(List<string> stringList)
+        private List<IToken> TransformStringListToTokenList(List<string> stringList)
         {
-            List<Token> output = new List<Token>();
+            List<IToken> output = new List<IToken>();
 
             foreach (string el in stringList)
             {
-                if (Double.TryParse(el, out double result)) output.Add(new Token(result, TokenType.Digit));
-                else if (el == "(" || el == ")") output.Add(new Token(el, TokenType.Sign));
-                else if (el == "x") output.Add(new Token(el, TokenType.Variable));
-                else output.Add(new Token(el, TokenType.Operator));
+                if (Double.TryParse(el, out double result)) output.Add(new TokenDigit(result));
+                else if (el == "(" || el == ")") output.Add(new TokenSign(el));
+                else if (el == "x") output.Add(new TokenDigit(Double.NaN));
+                else
+                {
+                    output.Add(new TokenOperator(el,, GetOperationDel(el)));
+                }
             }
 
             return output;
@@ -184,70 +187,7 @@ namespace FunctionBuilder
 
         public double Calculate()
         {
-            for (int i = 0; i < tokens.Count; i++)
-            {
-                if (tokens[i].Type != TokenType.Digit && tokens[i].Type != TokenType.Variable)
-                {
-                    switch (tokens[i].Content)
-                    {
-                        case "+":
-                            tokens[i] = new Token((Double)tokens[i - 2].Content + (Double)tokens[i - 1].Content);
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
-                            break;
-                        case "-":
-                            tokens[i] = new Token((Double)tokens[i - 2].Content - (Double)tokens[i - 1].Content);
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
-                            break;
-                        case "*":
-                            tokens[i] = new Token((Double)tokens[i - 2].Content * (Double)tokens[i - 1].Content);
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
-                            break;
-                        case "/":
-                            tokens[i] = new Token((Double)tokens[i - 2].Content / (Double)tokens[i - 1].Content);
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
-                            break;
-                        case "^":
-                            tokens[i] = new Token(Math.Pow((Double)tokens[i - 2].Content, (Double)tokens[i - 1].Content));
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
-                            break;
-                        case "sin":
-                            tokens[i] = new Token(Math.Sin((Double)tokens[i - 1].Content));
-                            tokens.RemoveAt(i - 1);
-                            i -= 1;
-                            break;
-                        case "log":
-                            tokens[i] = new Token(Math.Log10((Double)tokens[i - 2].Content) / Math.Log10((Double)tokens[i - 1].Content));
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
-                            break;
-                        case "!":
-                            double x = 1;
-                            for (int ii = 2; ii <= (Double)tokens[i - 1].Content; ii++) x *= ii;
-                            tokens[i] = new Token(x);
-                            tokens.RemoveAt(i - 1);
-                            i -= 1;
-                            break;
-                        case "round":
-                            tokens[i] = new Token(Math.Round((Double)tokens[i - 1].Content));
-                            tokens.RemoveAt(i - 1);
-                            i -= 1;
-                            break;
-                    }
-                }
-            }
-
-            return (Double)tokens[0].Content;
+            return mainToken.GetNumber();
         }
 
         public void SetVariable(double digit)
@@ -333,22 +273,71 @@ namespace FunctionBuilder
 
             return true;
         }
-    }
 
-    class Token
-    {
-        public TokenType Type { get; private set; }
-        public object Content { get; private set; }
-        public Token(object content, TokenType type)
+        private GetNumberDel GetOperationDel(string input)
         {
-            Content = content;
-            Type = type;
+            GetNumberDel output;
+            switch (input)
+            {
+                case "+": return Add;
+                case "-": return Sub;
+                case "*": return Mul;
+                case "/": return Div;
+                case "^": return Exp;
+                case "sin": return Sin;
+                case "log": return Log;
+                case "!": return Factorial;
+                case "round": return Round;
+                default: throw new Exception("Не верное название оператора");
+            }
         }
-        public Token(double content)
+
+        GetNumberDel Add = new GetNumberDel((List<IToken> operands) =>
         {
-            Content = content;
-            Type = TokenType.Digit;
-        }
+            return operands[0].GetNumber() + operands[1].GetNumber();
+        });
+
+        GetNumberDel Sub = new GetNumberDel((List<IToken> operands) =>
+        {
+            return operands[0].GetNumber() - operands[1].GetNumber();
+        });
+
+        GetNumberDel Mul = new GetNumberDel((List<IToken> operands) =>
+        {
+            return operands[0].GetNumber() * operands[1].GetNumber();
+        });
+
+        GetNumberDel Div = new GetNumberDel((List<IToken> operands) =>
+        {
+            return operands[0].GetNumber() / operands[1].GetNumber();
+        });
+
+        GetNumberDel Exp = new GetNumberDel((List<IToken> operands) =>
+        {
+            return Math.Pow(operands[0].GetNumber(), operands[1].GetNumber());
+        });
+
+        GetNumberDel Sin = new GetNumberDel((List<IToken> operands) =>
+        {
+            return Math.Sin(operands[0].GetNumber());
+        });
+
+        GetNumberDel Log = new GetNumberDel((List<IToken> operands) =>
+        {
+            return Math.Log10(operands[0].GetNumber()) / Math.Log10(operands[1].GetNumber());
+        });
+
+        GetNumberDel Factorial = new GetNumberDel((List<IToken> operands) =>
+        {
+            double x = 1;
+            for (int ii = 2; ii <= operands[0].GetNumber(); ii++) x *= ii;
+            return x;
+        });
+
+        GetNumberDel Round = new GetNumberDel((List<IToken> operands) =>
+        {
+            return Math.Round(operands[0].GetNumber());
+        });
     }
 
     enum TokenType
@@ -358,4 +347,141 @@ namespace FunctionBuilder
         Sign,
         Variable
     }
+
+    interface IToken
+    {
+        public TokenType Type { get; }
+        public double GetNumber();
+    }
+
+    class TokenDigit : IToken
+    {
+        public TokenType Type { get; private set; }
+        public double Content { get; private set; }
+        public TokenDigit(double digit)
+        {
+            Content = digit;
+            if (double.IsNaN(digit))
+                Type = TokenType.Variable;
+            else
+                Type = TokenType.Digit;
+        }
+        public double GetNumber()
+        {
+            return Content;
+        }
+    }
+
+    /*interface TokenOperator : IToken
+    {
+        public string Content { get; }
+        public List<IToken> OperandsList { get; }
+    }*/
+
+    abstract class TokenOperator : IToken
+    {
+        public virtual TokenType Type { get; protected set; } = TokenType.Operator;
+        public virtual string Content { get; protected set; }
+        public virtual List<IToken> OperandsList { get; protected set; }
+        public abstract int Order { get; protected set; }
+        public TokenOperator(string content, List<IToken> operands)
+        {
+            Type = TokenType.Operator;
+            Content = content;
+            OperandsList = operands;
+        }
+        public abstract double GetNumber();
+    }
+
+    class TokenOperatorAdd : TokenOperator
+    {
+        public override int Order { get; protected set; } = 1;
+        public TokenOperatorAdd(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            return OperandsList[0].GetNumber() + OperandsList[1].GetNumber();
+        }
+    }
+    class TokenOperatorSub : TokenOperator
+    {
+        public TokenOperatorSub(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            return OperandsList[0].GetNumber() - OperandsList[1].GetNumber();
+        }
+    }
+    class TokenOperatorMul : TokenOperator
+    {
+        public TokenOperatorMul(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            return OperandsList[0].GetNumber() * OperandsList[1].GetNumber();
+        }
+    }
+    class TokenOperatorDiv : TokenOperator
+    {
+        public TokenOperatorDiv(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            return OperandsList[0].GetNumber() / OperandsList[1].GetNumber();
+        }
+    }
+    class TokenOperatorExp : TokenOperator
+    {
+        public TokenOperatorExp(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            return Math.Pow(OperandsList[0].GetNumber(), OperandsList[1].GetNumber());
+        }
+    }
+    class TokenOperatorSin : TokenOperator
+    {
+        public TokenOperatorSin(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            return Math.Sin(OperandsList[0].GetNumber());
+        }
+    }
+    class TokenOperatorLog : TokenOperator
+    {
+        public TokenOperatorLog(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            return Math.Log10(OperandsList[0].GetNumber()) / Math.Log10(OperandsList[1].GetNumber());
+        }
+    }
+    class TokenOperatorFactorial : TokenOperator
+    {
+        public TokenOperatorFactorial(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            double x = 1;
+            for (int ii = 2; ii <= OperandsList[0].GetNumber(); ii++) x *= ii;
+            return x;
+        }
+    }
+    class TokenOperatorRound : TokenOperator
+    {
+        public TokenOperatorRound(string content, List<IToken> operands) : base(content, operands) { }
+        public override double GetNumber()
+        {
+            return Math.Round(OperandsList[0].GetNumber());
+        }
+    }
+
+    class TokenSign : IToken
+    {
+        public TokenType Type { get; private set; } = TokenType.Sign;
+        public string Content { get; private set; }
+        public TokenSign(string content)
+        {
+            Content = content;
+        }
+        public double GetNumber()
+        {
+            throw new Exception("Попытка использования знака в качестве оператора");
+        }
+    }
+
+    delegate double GetNumberDel(List<IToken> operands);
 }
