@@ -43,9 +43,11 @@ namespace FunctionBuilder
 
             string[] pInput = ParseInput(input);
 
-            List<string> stringList = FormStringList(pInput);
+            List<IToken> tokenList = FormTokensList(pInput);
 
-            tokens = TransformStringListToTokenList(stringList);
+            tokenList = FormOrder(tokenList);
+
+            mainToken = GetMainToken(tokenList);
         }
 
         private List<IToken> FormTokensList(string[] pInput)
@@ -57,7 +59,7 @@ namespace FunctionBuilder
                 if (Double.TryParse(el, out double result)) output.Add(new TokenDigit(result));
                 else if (el == "(" || el == ")") output.Add(new TokenSign(el));
                 else if (el == "x") output.Add(new TokenDigit(Double.NaN));
-                else output.Add(new TokenOperator(el));
+                else output.Add(GetOperatorFromName(el));
             }
 
             return output;
@@ -99,7 +101,7 @@ namespace FunctionBuilder
                 {
                     if (secondList.Count >= 1)
                     {
-                        if ((TokenOperator)secondList[secondList.Count - 1].Order >= ordersList[pInput[i]])
+                        if (((TokenOperator)secondList[secondList.Count - 1]).Order >= ((TokenOperator)pInput[i]).Order)
                         {
                             firstList.Add(secondList[secondList.Count - 1]);
                             secondList.RemoveAt(secondList.Count - 1);
@@ -110,9 +112,9 @@ namespace FunctionBuilder
 
                 if (isDebugEnabled)
                 {
-                    for (int ii = 0; ii < pInput.Length; ii++)
+                    for (int ii = 0; ii < pInput.Count; ii++)
                     {
-                        Debug.Write(pInput[ii] + " ");
+                        Debug.Write(pInput[ii].Content + " ");
                     }
                     Debug.WriteLine(' ');
                     Debug.WriteLine(' ');
@@ -129,27 +131,25 @@ namespace FunctionBuilder
 
             return firstList;
         }
-        private List<IToken> TransformStringListToTokenList(List<string> stringList)
+        private IToken GetMainToken(List<IToken> tokenList)
         {
-            List<IToken> output = new List<IToken>();
+            IToken lastOperator = null;
 
-            foreach (string el in stringList)
+            for (int i = 0; i < tokenList.Count; i++)
             {
-                if (Double.TryParse(el, out double result)) output.Add(new TokenDigit(result));
-                else if (el == "(" || el == ")") output.Add(new TokenSign(el));
-                else if (el == "x") output.Add(new TokenDigit(Double.NaN));
-                else
+                if (tokenList[i].Type == TokenType.Operator)
                 {
-                    output.Add(new TokenOperator(el,, GetOperationDel(el)));
+                    ((TokenOperator)tokenList[i]).SetOperands(tokenList, i);
+                    lastOperator = tokenList[i];
                 }
             }
 
-            return output;
+            return lastOperator;
         }
 
         public Rpn(Rpn input)
         {
-            tokens = new List<Token>(input.tokens);
+            mainToken = input.mainToken;
         }
 
         private static string[] ParseInput(string input)
@@ -211,20 +211,20 @@ namespace FunctionBuilder
             return mainToken.GetNumber();
         }
 
-        public void SetVariable(double digit)
+        private void FindAndSetVariable(IToken token, double digit)
         {
-            for (int i = 0; i < tokens.Count; i++)
-                if (tokens[i].Type == TokenType.Variable)
-                    tokens[i] = new Token(digit);
+            if (token.Type == TokenType.Variable)
+                token = new TokenDigit(digit);
+            else if (token.Type == TokenType.Operator)
+                foreach (IToken operand in ((TokenOperator)token).OperandsList)
+                    FindAndSetVariable(operand, digit);
         }
 
         public Rpn GetNewRpnWithSetVariable(double digit)
         {
             Rpn output = new Rpn(this);
 
-            for (int i = 0; i < tokens.Count; i++)
-                if (tokens[i].Type == TokenType.Variable)
-                    output.tokens[i] = new Token(digit);
+            output.FindAndSetVariable(mainToken, digit);
 
             return output;
         }
@@ -295,20 +295,19 @@ namespace FunctionBuilder
             return true;
         }
 
-        private GetNumberDel GetOperationDel(string input)
+        private TokenOperator GetOperatorFromName(string input)
         {
-            GetNumberDel output;
             switch (input)
             {
-                case "+": return Add;
-                case "-": return Sub;
-                case "*": return Mul;
-                case "/": return Div;
-                case "^": return Exp;
-                case "sin": return Sin;
-                case "log": return Log;
-                case "!": return Factorial;
-                case "round": return Round;
+                case "+": return new TokenOperatorAdd();
+                case "-": return new TokenOperatorSub();
+                case "*": return new TokenOperatorMul();
+                case "/": return new TokenOperatorDiv();
+                case "^": return new TokenOperatorExp();
+                case "sin": return new TokenOperatorSin();
+                case "log": return new TokenOperatorLog();
+                case "!": return new TokenOperatorFactorial();
+                case "round": return new TokenOperatorRound();
                 default: throw new Exception("Не верное название оператора");
             }
         }
@@ -394,21 +393,27 @@ namespace FunctionBuilder
         }
     }
 
-    class TokenOperator : IToken
+    abstract class TokenOperator : IToken
     {
         public virtual TokenType Type { get; protected set; } = TokenType.Operator;
         public virtual Object Content { get; protected set; }
-        public virtual List<IToken> OperandsList { get; protected set; }
-        public virtual int Order { get; protected set; }
-        public virtual int OperandsNum { get; protected set; }
-        public TokenOperator(string content)
+        public virtual List<IToken> OperandsList { get; protected set; } = new List<IToken>();
+        public abstract int Order { get; protected set; }
+        public abstract int OperandsNum { get; protected set; }
+        public TokenOperator()
         {
             Type = TokenType.Operator;
-            Content = content;
         }
         public double GetNumber() 
         {
             throw new Exception("Попытка получить число от неопределённого оператора");
+        }
+        public void SetOperands(List<IToken> tokens, int pos)
+        {
+            for (int i = 1; i <= OperandsNum; i++)
+            {
+                OperandsList.Add(tokens[pos - i]);
+            }
         }
     }
 
@@ -416,67 +421,70 @@ namespace FunctionBuilder
     {
         public override int Order { get; protected set; } = 1;
         public override int OperandsNum { get; protected set; } = 2;
-        public TokenOperatorAdd(string content, List<IToken> operands) : base(content) 
-        {
-            OperandsList = operands;
-        }
-        public override double GetNumber()
+        public new double GetNumber()
         {
             return OperandsList[0].GetNumber() + OperandsList[1].GetNumber();
         }
     }
     class TokenOperatorSub : TokenOperator
     {
-        public TokenOperatorSub(string content, List<IToken> operands) : base(content, operands) { }
-        public override double GetNumber()
+        public override int Order { get; protected set; } = 1;
+        public override int OperandsNum { get; protected set; } = 2;
+        public new double GetNumber()
         {
             return OperandsList[0].GetNumber() - OperandsList[1].GetNumber();
         }
     }
     class TokenOperatorMul : TokenOperator
     {
-        public TokenOperatorMul(string content, List<IToken> operands) : base(content, operands) { }
-        public override double GetNumber()
+        public override int Order { get; protected set; } = 2;
+        public override int OperandsNum { get; protected set; } = 2;
+        public new double GetNumber()
         {
             return OperandsList[0].GetNumber() * OperandsList[1].GetNumber();
         }
     }
     class TokenOperatorDiv : TokenOperator
     {
-        public TokenOperatorDiv(string content, List<IToken> operands) : base(content, operands) { }
-        public override double GetNumber()
+        public override int Order { get; protected set; } = 2;
+        public override int OperandsNum { get; protected set; } = 2;
+        public new double GetNumber()
         {
             return OperandsList[0].GetNumber() / OperandsList[1].GetNumber();
         }
     }
     class TokenOperatorExp : TokenOperator
     {
-        public TokenOperatorExp(string content, List<IToken> operands) : base(content, operands) { }
-        public override double GetNumber()
+        public override int Order { get; protected set; } = 3;
+        public override int OperandsNum { get; protected set; } = 2;
+        public new double GetNumber()
         {
             return Math.Pow(OperandsList[0].GetNumber(), OperandsList[1].GetNumber());
         }
     }
     class TokenOperatorSin : TokenOperator
     {
-        public TokenOperatorSin(string content, List<IToken> operands) : base(content, operands) { }
-        public override double GetNumber()
+        public override int Order { get; protected set; } = 10;
+        public override int OperandsNum { get; protected set; } = 1;
+        public new double GetNumber()
         {
             return Math.Sin(OperandsList[0].GetNumber());
         }
     }
     class TokenOperatorLog : TokenOperator
     {
-        public TokenOperatorLog(string content, List<IToken> operands) : base(content, operands) { }
-        public override double GetNumber()
+        public override int Order { get; protected set; } = 10;
+        public override int OperandsNum { get; protected set; } = 2;
+        public new double GetNumber()
         {
             return Math.Log10(OperandsList[0].GetNumber()) / Math.Log10(OperandsList[1].GetNumber());
         }
     }
     class TokenOperatorFactorial : TokenOperator
     {
-        public TokenOperatorFactorial(string content, List<IToken> operands) : base(content, operands) { }
-        public override double GetNumber()
+        public override int Order { get; protected set; } = 10;
+        public override int OperandsNum { get; protected set; } = 1;
+        public new double GetNumber()
         {
             double x = 1;
             for (int ii = 2; ii <= OperandsList[0].GetNumber(); ii++) x *= ii;
@@ -485,8 +493,9 @@ namespace FunctionBuilder
     }
     class TokenOperatorRound : TokenOperator
     {
-        public TokenOperatorRound(string content, List<IToken> operands) : base(content, operands) { }
-        public override double GetNumber()
+        public override int Order { get; protected set; } = 10;
+        public override int OperandsNum { get; protected set; } = 1;
+        public new double GetNumber()
         {
             return Math.Round(OperandsList[0].GetNumber());
         }
@@ -495,7 +504,7 @@ namespace FunctionBuilder
     class TokenSign : IToken
     {
         public TokenType Type { get; private set; } = TokenType.Sign;
-        public string Content { get; private set; }
+        public object Content { get; private set; }
         public TokenSign(string content)
         {
             Content = content;
