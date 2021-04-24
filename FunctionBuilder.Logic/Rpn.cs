@@ -191,57 +191,31 @@ namespace FunctionBuilder
                     switch (tokens[i].Content)
                     {
                         case "+":
-                            tokens[i] = new Token((Double)tokens[i - 2].Content + (Double)tokens[i - 1].Content);
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
+                            DoOperation(tokens, ref i, Operations.Add, (string)tokens[i].Content);
                             break;
                         case "-":
-                            tokens[i] = new Token((Double)tokens[i - 2].Content - (Double)tokens[i - 1].Content);
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
+                            DoOperation(tokens, ref i, Operations.Sub, (string)tokens[i].Content);
                             break;
                         case "*":
-                            tokens[i] = new Token((Double)tokens[i - 2].Content * (Double)tokens[i - 1].Content);
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
+                            DoOperation(tokens, ref i, Operations.Mul, (string)tokens[i].Content);
                             break;
                         case "/":
-                            tokens[i] = new Token((Double)tokens[i - 2].Content / (Double)tokens[i - 1].Content);
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
+                            DoOperation(tokens, ref i, Operations.Div, (string)tokens[i].Content);
                             break;
                         case "^":
-                            tokens[i] = new Token(Math.Pow((Double)tokens[i - 2].Content, (Double)tokens[i - 1].Content));
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
+                            DoOperation(tokens, ref i, Operations.Exp, (string)tokens[i].Content);
                             break;
                         case "sin":
-                            tokens[i] = new Token(Math.Sin((Double)tokens[i - 1].Content));
-                            tokens.RemoveAt(i - 1);
-                            i -= 1;
+                            DoOperation(tokens, ref i, Operations.Sin, (string)tokens[i].Content);
                             break;
                         case "log":
-                            tokens[i] = new Token(Math.Log10((Double)tokens[i - 2].Content) / Math.Log10((Double)tokens[i - 1].Content));
-                            tokens.RemoveAt(i - 1);
-                            tokens.RemoveAt(i - 2);
-                            i -= 2;
+                            DoOperation(tokens, ref i, Operations.Log, (string)tokens[i].Content);
                             break;
                         case "!":
-                            double x = 1;
-                            for (int ii = 2; ii <= (Double)tokens[i - 1].Content; ii++) x *= ii;
-                            tokens[i] = new Token(x);
-                            tokens.RemoveAt(i - 1);
-                            i -= 1;
+                            DoOperation(tokens, ref i, Operations.Factorial, (string)tokens[i].Content);
                             break;
                         case "round":
-                            tokens[i] = new Token(Math.Round((Double)tokens[i - 1].Content));
-                            tokens.RemoveAt(i - 1);
-                            i -= 1;
+                            DoOperation(tokens, ref i, Operations.Round, (string)tokens[i].Content);
                             break;
                     }
                 }
@@ -249,6 +223,60 @@ namespace FunctionBuilder
 
             return (Double)tokens[0].Content;
         }
+        delegate Token OperationDel(List<Token> operands, int pos);
+        private static void DoOperation(List<Token> tokens, ref int pos, OperationDel del, string content)
+        {
+            tokens[pos] = del(tokens, pos);
+
+            for (int i = 1; i <= operandsNumList[content]; i++)
+            {
+                tokens.RemoveAt(pos - i);
+            }
+            pos -= operandsNumList[content];
+        }
+        static class Operations
+        {
+            public static OperationDel Add = new OperationDel((List<Token> tokens, int i) =>
+            {
+                return new Token((Double)tokens[i - 2].Content + (Double)tokens[i - 1].Content);
+            });
+            public static OperationDel Sub = new OperationDel((List < Token > tokens, int i) =>
+            {
+                return new Token((Double)tokens[i - 2].Content - (Double)tokens[i - 1].Content);
+            });
+            public static OperationDel Mul = new OperationDel((List<Token> tokens, int i) =>
+            {
+                return new Token((Double)tokens[i - 2].Content * (Double)tokens[i - 1].Content);
+            });
+            public static OperationDel Div = new OperationDel((List<Token> tokens, int i) =>
+            {
+                return new Token((Double)tokens[i - 2].Content / (Double)tokens[i - 1].Content);
+            });
+            public static OperationDel Exp = new OperationDel((List<Token> tokens, int i) =>
+            {
+                return new Token(Math.Pow((Double)tokens[i - 2].Content, (Double)tokens[i - 1].Content));
+            });
+            public static OperationDel Sin = new OperationDel((List<Token> tokens, int i) =>
+            {
+                return new Token(Math.Sin((Double)tokens[i - 1].Content));
+            });
+            public static OperationDel Log = new OperationDel((List<Token> tokens, int i) =>
+            {
+                return new Token(Math.Log10((Double)tokens[i - 2].Content) / Math.Log10((Double)tokens[i - 1].Content));
+            });
+            public static OperationDel Factorial = new OperationDel((List<Token> tokens, int i) =>
+            {
+                double x = 1;
+                for (int ii = 2; ii <= (Double)tokens[i - 1].Content; ii++) x *= ii;
+                return new Token(x);
+            });
+            public static OperationDel Round = new OperationDel((List<Token> tokens, int i) =>
+            {
+                return new Token(Math.Round((Double)tokens[i - 1].Content));
+            });
+        }
+
+        
 
         public Rpn GetNewRpnWithSetVariable(double digit)
         {
