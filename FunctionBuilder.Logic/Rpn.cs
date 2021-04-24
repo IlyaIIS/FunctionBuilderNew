@@ -47,38 +47,59 @@ namespace FunctionBuilder
 
             tokens = TransformStringListToTokenList(stringList);
         }
-        private List<string> FormStringList(string[] pInput)
+
+        private List<IToken> FormTokensList(string[] pInput)
         {
-            List<string> firstList = new List<string>();
-            List<string> secondList = new List<string>();
+            List<IToken> output = new List<IToken>();
+
+            foreach (string el in pInput)
+            {
+                if (Double.TryParse(el, out double result)) output.Add(new TokenDigit(result));
+                else if (el == "(" || el == ")") output.Add(new TokenSign(el));
+                else if (el == "x") output.Add(new TokenDigit(Double.NaN));
+                else output.Add(new TokenOperator(el));
+            }
+
+            return output;
+        }
+
+        private List<IToken> FormOrder(List<IToken> pInput)
+        {
+            List<IToken> firstList = new List<IToken>();
+            List<IToken> secondList = new List<IToken>();
             bool isDebugEnabled = false;
 
-            for (int i = 0; i < pInput.Length; i++)
+            for (int i = 0; i < pInput.Count; i++)
             {
-                if (Char.IsDigit(pInput[i][0]) || pInput[i] == "x") firstList.Add(pInput[i]);
-                else if (pInput[i][0] == '(') secondList.Add(pInput[i]);
-                else if (pInput[i][0] == ')')
+                if (pInput[i].Type == TokenType.Digit) firstList.Add(pInput[i]);
+                else if (pInput[i].Type == TokenType.Sign)
                 {
-                    for (int ii = secondList.Count - 1; ii >= 0; ii--)
+                    if ((string)pInput[i].Content == "(")
                     {
-                        if (secondList[ii] == "(")
+                        secondList.Add(pInput[i]);
+                    }
+                    else if ((string)pInput[i].Content == ")")
+                    {
+                        for (int ii = secondList.Count - 1; ii >= 0; ii--)
                         {
-                            secondList.RemoveAt(secondList.Count - 1);
-                            break;
-                        }
-                        else
-                        {
-                            firstList.Add(secondList[secondList.Count - 1]);
-                            secondList.RemoveAt(secondList.Count - 1);
+                            if (secondList[ii].Type == TokenType.Operator && (string)secondList[ii].Content == "(")
+                            {
+                                secondList.RemoveAt(secondList.Count - 1);
+                                break;
+                            }
+                            else
+                            {
+                                firstList.Add(secondList[secondList.Count - 1]);
+                                secondList.RemoveAt(secondList.Count - 1);
+                            }
                         }
                     }
                 }
                 else
-                if (operatorArr.Contains(pInput[i]))
                 {
                     if (secondList.Count >= 1)
                     {
-                        if (ordersList[secondList[secondList.Count - 1]] >= ordersList[pInput[i]])
+                        if ((TokenOperator)secondList[secondList.Count - 1].Order >= ordersList[pInput[i]])
                         {
                             firstList.Add(secondList[secondList.Count - 1]);
                             secondList.RemoveAt(secondList.Count - 1);
@@ -351,13 +372,14 @@ namespace FunctionBuilder
     interface IToken
     {
         public TokenType Type { get; }
+        public object Content { get; }
         public double GetNumber();
     }
 
     class TokenDigit : IToken
     {
         public TokenType Type { get; private set; }
-        public double Content { get; private set; }
+        public object Content { get; private set; }
         public TokenDigit(double digit)
         {
             Content = digit;
@@ -368,35 +390,36 @@ namespace FunctionBuilder
         }
         public double GetNumber()
         {
-            return Content;
+            return (double)Content;
         }
     }
 
-    /*interface TokenOperator : IToken
-    {
-        public string Content { get; }
-        public List<IToken> OperandsList { get; }
-    }*/
-
-    abstract class TokenOperator : IToken
+    class TokenOperator : IToken
     {
         public virtual TokenType Type { get; protected set; } = TokenType.Operator;
-        public virtual string Content { get; protected set; }
+        public virtual Object Content { get; protected set; }
         public virtual List<IToken> OperandsList { get; protected set; }
-        public abstract int Order { get; protected set; }
-        public TokenOperator(string content, List<IToken> operands)
+        public virtual int Order { get; protected set; }
+        public virtual int OperandsNum { get; protected set; }
+        public TokenOperator(string content)
         {
             Type = TokenType.Operator;
             Content = content;
-            OperandsList = operands;
         }
-        public abstract double GetNumber();
+        public double GetNumber() 
+        {
+            throw new Exception("Попытка получить число от неопределённого оператора");
+        }
     }
 
     class TokenOperatorAdd : TokenOperator
     {
         public override int Order { get; protected set; } = 1;
-        public TokenOperatorAdd(string content, List<IToken> operands) : base(content, operands) { }
+        public override int OperandsNum { get; protected set; } = 2;
+        public TokenOperatorAdd(string content, List<IToken> operands) : base(content) 
+        {
+            OperandsList = operands;
+        }
         public override double GetNumber()
         {
             return OperandsList[0].GetNumber() + OperandsList[1].GetNumber();
