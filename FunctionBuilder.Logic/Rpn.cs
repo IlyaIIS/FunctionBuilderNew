@@ -250,13 +250,6 @@ namespace FunctionBuilder
             return (Double)tokens[0].Content;
         }
 
-        public void SetVariable(double digit)
-        {
-            for (int i = 0; i < tokens.Count; i++)
-                if (tokens[i].Type == TokenType.Variable)
-                    tokens[i] = new Token(digit);
-        }
-
         public Rpn GetNewRpnWithSetVariable(double digit)
         {
             Rpn output = new Rpn(this);
