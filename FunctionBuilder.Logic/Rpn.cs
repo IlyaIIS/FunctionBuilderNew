@@ -11,19 +11,6 @@ namespace FunctionBuilder
         static readonly string[] signArr = new string[] { "+", "-", "*", "/", "^", "(", ")", "," };
         static readonly string[] zeroOperatorArr = { "-", "+", "*", "/", "^" };
         static readonly string[] operatorArr = { "+", "-", "*", "/", "^", "(", ")", "sin", "log", "!", "round" };
-        static Dictionary<string, int> ordersList = new Dictionary<string, int>
-        {
-            {"(", 0},
-            {"+", 1},
-            {"-", 1},
-            {"*", 2},
-            {"/", 2},
-            {"^", 3},
-            {"sin", 10},
-            {"log", 10},
-            {"!", 10},
-            {"round", 10}
-        };
         static Dictionary<string, int> operandsNumList = new Dictionary<string, int>
         {
             {"+", 2},
@@ -101,7 +88,7 @@ namespace FunctionBuilder
                 {
                     if (secondList.Count >= 1)
                     {
-                        if (((TokenOperator)secondList[secondList.Count - 1]).Order >= ((TokenOperator)pInput[i]).Order)
+                        if (((IHaveOrder)secondList[secondList.Count - 1]).Order >= ((IHaveOrder)pInput[i]).Order)
                         {
                             firstList.Add(secondList[secondList.Count - 1]);
                             secondList.RemoveAt(secondList.Count - 1);
@@ -311,53 +298,6 @@ namespace FunctionBuilder
                 default: throw new Exception("Не верное название оператора");
             }
         }
-
-        GetNumberDel Add = new GetNumberDel((List<IToken> operands) =>
-        {
-            return operands[0].GetNumber() + operands[1].GetNumber();
-        });
-
-        GetNumberDel Sub = new GetNumberDel((List<IToken> operands) =>
-        {
-            return operands[0].GetNumber() - operands[1].GetNumber();
-        });
-
-        GetNumberDel Mul = new GetNumberDel((List<IToken> operands) =>
-        {
-            return operands[0].GetNumber() * operands[1].GetNumber();
-        });
-
-        GetNumberDel Div = new GetNumberDel((List<IToken> operands) =>
-        {
-            return operands[0].GetNumber() / operands[1].GetNumber();
-        });
-
-        GetNumberDel Exp = new GetNumberDel((List<IToken> operands) =>
-        {
-            return Math.Pow(operands[0].GetNumber(), operands[1].GetNumber());
-        });
-
-        GetNumberDel Sin = new GetNumberDel((List<IToken> operands) =>
-        {
-            return Math.Sin(operands[0].GetNumber());
-        });
-
-        GetNumberDel Log = new GetNumberDel((List<IToken> operands) =>
-        {
-            return Math.Log10(operands[0].GetNumber()) / Math.Log10(operands[1].GetNumber());
-        });
-
-        GetNumberDel Factorial = new GetNumberDel((List<IToken> operands) =>
-        {
-            double x = 1;
-            for (int ii = 2; ii <= operands[0].GetNumber(); ii++) x *= ii;
-            return x;
-        });
-
-        GetNumberDel Round = new GetNumberDel((List<IToken> operands) =>
-        {
-            return Math.Round(operands[0].GetNumber());
-        });
     }
 
     enum TokenType
@@ -393,7 +333,7 @@ namespace FunctionBuilder
         }
     }
 
-    abstract class TokenOperator : IToken
+    abstract class TokenOperator : IToken, IHaveOrder
     {
         public virtual TokenType Type { get; protected set; } = TokenType.Operator;
         public virtual Object Content { get; protected set; }
@@ -501,10 +441,11 @@ namespace FunctionBuilder
         }
     }
 
-    class TokenSign : IToken
+    class TokenSign : IToken, IHaveOrder
     {
         public TokenType Type { get; private set; } = TokenType.Sign;
         public object Content { get; private set; }
+        public int Order { get; private set; } = 0;
         public TokenSign(string content)
         {
             Content = content;
@@ -513,6 +454,11 @@ namespace FunctionBuilder
         {
             throw new Exception("Попытка использования знака в качестве оператора");
         }
+    }
+
+    interface IHaveOrder
+    {
+        public int Order { get; }
     }
 
     delegate double GetNumberDel(List<IToken> operands);
